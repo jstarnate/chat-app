@@ -1,0 +1,50 @@
+.main {
+	min-height: calc(100vh - 54px);
+	display: flex;
+	flex-direction: column;
+
+	&__header {
+		top: 54px;
+	}
+
+	&__presence {
+		@include size(10px);
+	}
+
+	&__name-placeholder {
+		@include size(100px, 20px)
+	}
+
+	&__conversation {
+		overflow-y: auto;
+	}
+
+	&__message {
+		max-width: 50%;
+	}
+
+	&__message-container {
+		top: 100%;
+		bottom: 0;
+	}
+
+	&__message-box {
+		resize: none;
+	}
+
+	&__users {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		grid-gap: var(--space-md);
+	}
+
+	&__user-image {
+		@include size(40px);
+	}
+
+	&__modal-overlay {
+		@include coords(0, null, null, 0);
+		@include size(100vw, calc(100vh - 49px));
+		background: rgba(0, 0, 0, 0.5);
+	}
+}

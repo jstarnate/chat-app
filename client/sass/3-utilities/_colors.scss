@@ -1,0 +1,71 @@
+// BACKGROUND COLORS
+.bg--none {
+	background: none;
+}
+
+.bg--white {
+	background: var(--white);
+}
+
+.bg--black {
+	background: var(--black);
+}
+
+.bg--pale {
+	background: var(--pale);
+}
+
+.bg--gray-20 {
+	background: var(--gray-20);
+}
+
+.bg--gray-40 {
+	background: var(--gray-40);
+}
+
+.bg--gray-60 {
+	background: var(--gray-60);
+}
+
+.bg--blue {
+	background: var(--blue);
+}
+
+.bg--danger {
+	color: var(--red);
+}
+
+
+
+// TEXT COLORS
+.text--white {
+	color: var(--white);
+}
+
+.text--black {
+	color: var(--black);
+}
+
+.text--gray-20 {
+	color: var(--gray-20);
+}
+
+.text--gray-40 {
+	color: var(--gray-40);
+}
+
+.text--gray-60 {
+	color: var(--gray-60);
+}
+
+.text--blue {
+	color: var(--blue);
+}
+
+.text--lightblue {
+	color: var(--light-blue);
+}
+
+.text--danger {
+	color: var(--red);
+}

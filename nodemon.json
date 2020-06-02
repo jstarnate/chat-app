@@ -1,0 +1,6 @@
+{
+	"verbose": false,
+	"ignore": ["client/**/**", "node_modules/**/**"],
+	"watch": ["server.babel.js", "controllers/", "middlewares/", "models/", "routes/", "config/"],
+	"ext": "js"
+}

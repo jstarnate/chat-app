@@ -1,0 +1,52 @@
+@media only screen and (max-width: 1024px) {
+	.sidebar {
+		width: 30%;
+	}
+}
+
+@media only screen and (max-width: 768px) {
+	.header {
+		&__bars {
+			display: inline-block;
+		}
+
+		&__arrow {
+			display: block;
+			margin-left: auto;
+		}
+
+		&__signout {
+			margin-left: var(--space-md);
+		}
+	}
+
+	.sidebar {
+		width: 0;
+
+		&__wrap {
+			width: 250px;
+			left: -250px;
+			z-index: 10;
+			transition: left 200ms ease-in-out;
+
+			&.show {
+				left: 0;
+			}
+		}
+	}
+
+	.rightbar {
+		width: 0;
+
+		&__wrap {
+			width: 250px;
+			right: -250px;
+			z-index: 10;
+			transition: right 200ms ease-in-out;
+
+			&.show {
+				right: 0;
+			}
+		}
+	}
+}

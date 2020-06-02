@@ -1,0 +1,29 @@
+.rightbar {
+	$this: &;
+	width: 200px;
+
+	&__wrap {
+		@include coords(55px, 0, null, null);
+		width: inherit;
+		min-height: calc(100vh - 55px);
+	}
+
+	&__avatar {
+		width: 100px;
+	}
+
+	&__upload-button {
+		@include coords(0, null, null, 0);
+		@include size(100%);
+		background: rgba(0, 0, 0, 0.5);
+		opacity: 0;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+
+	&__loading-image {
+		@include size(100px);
+	}
+}

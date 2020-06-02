@@ -1,0 +1,15 @@
+* {
+	box-sizing: border-box;
+	font-family: 'Nunito', sans-serif;
+	margin: 0;
+	color: var(--black);
+	outline: none;
+}
+
+html {
+	font-size: var(--font-md);
+}
+
+a[href] {
+	text-decoration: none;
+}

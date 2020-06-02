@@ -1,0 +1,56 @@
+.btn {
+	border: none;
+	background: none;
+	cursor: pointer;
+
+	&:disabled {
+		background: var(--pale);
+		color: var(--gray-40);
+		cursor: default;
+	}
+}
+
+.btn--blue:not(:disabled) {
+	background: var(--light-blue);
+	color: var(--white);
+
+	&:hover {
+		background: lighten(#45A3D7, 5%);
+	}
+}
+
+.btn--secondary:not(:disabled) {
+	background: var(--gray-60);
+	color: var(--black);
+
+	&:hover {
+		background: var(--gray-40);
+	}
+}
+
+.btn--black {
+	background: var(--black);
+	color: var(--white);
+
+	&:hover {
+		background: lighten(#333333, 5%);
+	}
+}
+
+.btn--white {
+	background: none;
+	color: var(--black);
+
+	&:hover {
+		background: darken(#FFFFFF, 5%);
+	}
+}
+
+.btn--danger {
+	background: var(--red);
+	color: var(--white);
+
+	&:hover {
+		background: lighten(#DC3333, 5%);
+	}
+}

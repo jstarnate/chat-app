@@ -1,0 +1,10 @@
+.overlay {
+	position: fixed;
+	@include coords(0, 0, 0, 0);
+	background: rgba(0, 0, 0, 0.8);
+	z-index: 1000;
+
+	&__modal {
+		width: 320px;
+	}
+}
