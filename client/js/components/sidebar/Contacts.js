@@ -6,10 +6,9 @@ import { get as axiosGet } from 'axios'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
-import { set, add } from 'Actions'
+import { set, add, updateStatus } from 'Actions'
 
 const localStorageUser = JSON.parse(localStorage.getItem('user'))
-const io = socket(`${process.env.APP_URL}/contacts`)
 
 export default function() {
 	const [loading, setLoading] = useState(false)
@@ -17,34 +16,49 @@ export default function() {
 	const [userId, setUserId] = useState(null)
 	const contacts = useSelector(state => state.contacts)
 	const dispatch = useDispatch()
+	const io = socket(`${process.env.APP_URL}/contacts`)
 	let isMounted = false
 
 	useEffect(() => {
 		isMounted = true
 
-		if (!contacts) {
+		if (!contacts.length)
 			getContacts()
-		}
-		else {
+		else
 			setFinished(true)
-		}
 
 		getUserId()
-		initializeSocket()
 
 		return () => {
-			io.disconnect()
 			isMounted = false
 		}
 	}, [])
 
+	useEffect(() => {
+		io.on('online user', (id) => {
+			if (contacts.find(contact => contact._id === id)) {
+				dispatch(updateStatus(id, true))
+			}
+		})
+
+		io.on('offline user', (id) => {
+			dispatch(updateStatus(id, false))
+		})
+
+		io.on(`add to contacts ${userId}`, (user) => {
+			dispatch(add('contacts', user))
+		})
+	}, [contacts])
+
 	function getUserId() {
 		if (localStorageUser) {
 			setUserId(localStorageUser._id)
+			io.emit('user connects', localStorageUser._id)
 		}
 		else {
 			axiosGet('/api/user').then(({ data }) => {
 				setUserId(data.user._id)
+				io.emit('user connects', data.user._id)
 			})
 		}
 	}
@@ -65,12 +79,6 @@ export default function() {
 				setLoading(false)
 				setFinished(null)
 			})
-	}
-
-	function initializeSocket() {
-		io.on(`add to contacts ${userId}`, (user) => {
-			dispatch(add('contacts', user))
-		})
 	}
 
 	return (
@@ -102,7 +110,7 @@ export default function() {
 							}
 							
 							<span className='text--bold mg-l--sm sidebar__item-info'>{contact.first_name} {contact.last_name}</span>
-							<span className='bg--blue round mg-l--auto sidebar__right-side'></span>
+							{ contact.online && <span className='bg--blue round mg-l--auto sidebar__right-side'></span> }
 						</NavLink>
 					))}
 				</section>

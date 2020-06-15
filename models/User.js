@@ -32,6 +32,10 @@ const userSchema = new Schema({
 		type: String,
 		minlength: [8, 'Must be at least 8 characters long.']
 	},
+	online: {
+		type: Boolean,
+		default: false
+	},
 	messages: [
 		{ type: Schema.Types.ObjectId, ref: 'Message' }
 	],

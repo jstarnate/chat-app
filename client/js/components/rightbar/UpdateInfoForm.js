@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { post as axiosPost, put as axiosPut, delete as axiosDelete } from 'axios'
 import { func } from 'prop-types'
-import UpdateFormInputField from 'Utilities/UpdateFormInputField'
+import UpdateFormInputField from './UpdateFormInputField'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Pulse from 'Utilities/Pulse'
