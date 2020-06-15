@@ -14,6 +14,20 @@ export default (state, action) => {
 		return state
 	}
 
+	if (action.type === 'UPDATE_STATUS') {
+		const mapped = state.contacts.map(contact => {
+			if (contact._id === action.id) {
+				contact.online = action.boolean
+			}
+
+			return contact
+		})
+
+		state.contacts = mapped
+
+		return state
+	}
+
 	if (action.type === 'DELETE') {
 		const filtered = state[action.name].filter(item => item._id !== action.id)
 

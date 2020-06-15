@@ -5,7 +5,7 @@ import Spinner from 'Utilities/Spinner'
 const UpdateInfoForm = lazy(() => import('./rightbar/UpdateInfoForm'))
 
 export default function() {
-	const [editMode, setEditMode] = useState(true)
+	const [editMode, setEditMode] = useState(false)
 
 	return (
 		<aside className='rightbar'>

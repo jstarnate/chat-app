@@ -1,6 +1,6 @@
 export default {
 	user: null,
-	contacts: null,
+	contacts: [],
 	messages: [],
 	showSidebar: false,
 	showRightbar: false,
