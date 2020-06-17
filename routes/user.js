@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import multer from 'multer'
 import userController from '../controllers/userController'
+import trimRequest from '../middlewares/trimRequest'
 
 const router = Router()
 const upload = multer({ dest: './storage' })
@@ -17,7 +18,7 @@ router.post('/contacts/accept', userController.acceptRequest)
 router.post('/contacts/remove_request', userController.removeRequest)
 router.post('/upload', upload.single('image'), userController.uploadImage)
 
-router.put('/update', userController.update)
+router.put('/update', trimRequest, userController.update)
 
 router.delete('/upload/delete-image', userController.deleteImage)
 

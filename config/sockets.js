@@ -3,14 +3,14 @@ import User from '../models/User'
 export default (io) => {
 
 	io.of('/contacts').on('connection', (socket) => {
-		const connectedUsers = []
-		
-		socket.on('user connects', (userId) => {
-			if (connectedUsers.indexOf(userId) === -1) {
-				connectedUsers.push(userId)
+		let connectedUsers = []
 
-				User.updateOne({ _id: userId }, { $set: { online: true } }, (err) => {
-					socket.broadcast.emit('online user', userId)
+		socket.on('user connects', (id) => {
+			if (!connectedUsers.find(user => user.userId === id)) {
+				connectedUsers.push({ userId: id, sid: socket.id })
+
+				User.updateOne({ _id: id }, { $set: { online: true } }, (err) => {
+					socket.broadcast.emit('online user', id)
 				})
 			}
 		})
@@ -33,11 +33,16 @@ export default (io) => {
 		})
 
 		socket.on('disconnect', () => {
-			connectedUsers.splice(connectedUsers.indexOf('5ee6806ec82d1b685024cdf5'), 1)
+			const disconnectId = socket.id
 
-			User.updateOne({ _id: '5ee6806ec82d1b685024cdf5' }, { $set: { online: false } }, (err) => {
-				socket.broadcast.emit('offline user', '5ee6806ec82d1b685024cdf5')
-			})
+			if (connectedUsers.find(user => user.sid === disconnectId)) {
+				const authUser = connectedUsers.find(user => user.sid === disconnectId)
+
+				User.updateOne({ _id: authUser.userId }, { $set: { online: false } }, (err) => {
+					socket.broadcast.emit('offline user', authUser.userId)
+					connectedUsers = connectedUsers.filter(user => user.userId !== authUser.userId)
+				})
+			}
 		})
 	})
 

@@ -41,7 +41,7 @@ class UserController {
 
 	getContacts(request, response) {
 		User.findById(request.user)
-			.populate({ path: 'contacts', select: ['_id', 'first_name', 'last_name', 'gender', 'image_path'] })
+			.populate({ path: 'contacts', select: ['_id', 'first_name', 'last_name', 'gender', 'image_path', 'online'] })
 			.exec((err, { contacts }) => {
 				if (err) {
 					return response.status(500).send('An error occured while fetching the contacts')

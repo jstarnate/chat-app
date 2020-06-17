@@ -1,6 +1,7 @@
 import React, { useEffect, Fragment } from 'react'
 import { useDispatch } from 'react-redux'
 import { get as axiosGet } from 'axios'
+import socket from 'socket.io-client'
 import { set } from 'Actions'
 import Header from 'Components/Header'
 import Sidebar from 'Components/Sidebar'
@@ -14,15 +15,19 @@ function clearLocalStorage() {
 
 export default function() {
 	const dispatch = useDispatch()
+	const io = socket(`${process.env.APP_URL}/contacts`) // TODO: If fails, add { reconnection: false }
 
 	useEffect(() => {
-		axiosGet('/api/user')
-			.then(({ data }) => {
-				localStorage.setItem('user', JSON.stringify(data.user))
-			})
-			.catch(err => {
-				console.error(err)
-			})
+		if (!localStorage.getItem('user')) {
+			axiosGet('/api/user')
+				.then(({ data }) => {
+					localStorage.setItem('user', JSON.stringify(data.user))
+					io.emit('user connects', data.user._id)
+				})
+				.catch(err => {
+					console.error(err)
+				})
+		}
 	}, [])
 
 	function confirmSignout() {
