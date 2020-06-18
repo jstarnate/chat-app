@@ -63,7 +63,7 @@ function User({ _id, first_name, last_name, username, gender, image_path, refres
 				) : (
 					<button
 						className='btn btn--blue b-rad--sm pd-t--xs pd-b--xs pd-l--sm pd-r--sm mg-l--auto'
-						title='Request to chat'
+						title='Send chat request'
 						onClick={requestChat}>
 						<i className='fa fa-user-plus text--white'></i>
 					</button>
