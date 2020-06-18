@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, Fragment } from 'react'
 import { post as axiosPost, put as axiosPut, delete as axiosDelete } from 'axios'
 import { func } from 'prop-types'
 import UpdateFormInputField from './UpdateFormInputField'
@@ -16,6 +16,7 @@ function UpdateInfoForm({ clickEvent }) {
 	const [imageLoading, setImageLoading] = useState(false)
 	const [submitLoading, setSubmitLoading] = useState(false)
 	const [errors, setErrors] = useState(null)
+	const [showModal, setShowModal] = useState(false)
 	const nothingChanged = user.first_name === first_name &&
 						   user.last_name === last_name &&
 						   user.username === username
@@ -78,83 +79,110 @@ function UpdateInfoForm({ clickEvent }) {
 			})
 	}
 
+	function closeModal() {
+		setShowModal(false)
+	}
+
+	function cancel() {
+		if (!(nothingChanged && user.image_path === image.path)) {
+			setShowModal(true)
+		}
+		else {
+			clickEvent()
+		}
+	}
+
 	return (
-		<form className='full-width' onSubmit={updateInfo}>
-			{
-				imageLoading ? (
-					<section className='text--center'>
-						<div className='d--if ai--center jc--center bg--gray-60 round rightbar__loading-image'>
-							<Pulse size={30} />
+		<Fragment>
+			<form className='full-width' onSubmit={updateInfo}>
+				{
+					imageLoading ? (
+						<section className='text--center'>
+							<div className='d--if ai--center jc--center round rightbar__avatar-container'>
+								<Pulse size={30} />
+							</div>
+						</section>
+					) : (
+						<section className='text--center'>
+							<div className='pos--rel d--ib round rightbar__avatar-container'>
+								{
+									!image.path && user.gender === 'Male' ? (
+										<MaleDefaultAvatar />
+									) : !image.path && user.gender === 'Female' ? (
+										<FemaleDefaultAvatar />
+									) : (
+										<img className='d--block round rightbar__avatar' src={image.path} alt='Avatar' />
+									)
+								}
+
+								{!submitLoading && (
+									<label
+										className='pos--abs d--flex ai--center jc--center font--xl round cursor--pointer rightbar__upload-button'
+										htmlFor='file-input'>
+										<i className='fa fa-camera text--white'></i>
+									</label>
+								)}
+
+								{!submitLoading && (
+									<input id='file-input' className='d--none' type='file' accept='.jpg,jpeg,.png' onChange={upload} />
+								)}
+							</div>
+						</section>
+					)
+				}
+
+				<UpdateFormInputField
+					label='First name'
+					value={first_name}
+					disabled={submitLoading}
+					onChange={handleFirstnameValue}
+					error={(errors && errors.first_name) ? errors.first_name.properties.message : null}
+					autoFocus
+				/>
+				
+				<UpdateFormInputField
+					label='Last name'
+					value={last_name}
+					disabled={submitLoading}
+					onChange={handleLastnameValue}
+					error={(errors && errors.last_name) ? errors.last_name.properties.message : null}
+				/>
+
+				<UpdateFormInputField
+					label='Username'
+					value={username}
+					disabled={submitLoading}
+					onChange={handleUsernameValue}
+					error={(errors && errors.username) ? errors.username.properties.message : null}
+				/>
+
+				<button
+					className='btn btn--blue full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--lg'
+					disabled={submitLoading || nothingChanged}>
+					Update
+				</button>
+
+				<button
+					className='btn btn--secondary full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--md'
+					type='button'
+					disabled={submitLoading}
+					onClick={cancel}>
+					Cancel
+				</button>
+			</form>
+
+			{showModal && (
+				<section className='d--flex ai--center jc--center overlay'>
+					<div className='bg--white b-rad--md overlay__modal'>
+						<p className='font--lg pd--md'>Are you sure you want to cancel?</p>
+						<div className='d--flex jc--end bt--1 b--gray-40 pd--sm'>
+							<button className='btn btn--secondary curved pd-t--xs pd-b--xs pd-l--md pd-r--md' onClick={closeModal}>No</button>
+							<button className='btn btn--danger text--bold curved pd-t--xs pd-b--xs pd-l--md pd-r--md mg-l--sm' onClick={clickEvent}>Cancel</button>
 						</div>
-					</section>
-				) : (
-					<section className='text--center'>
-						<div className='pos--rel d--ib'>
-							{
-								!image.path && user.gender === 'Male' ? (
-									<MaleDefaultAvatar />
-								) : !image.path && user.gender === 'Female' ? (
-									<FemaleDefaultAvatar />
-								) : (
-									<img className='d--block round rightbar__avatar' src={image.path} alt='Avatar' />
-								)
-							}
-
-							{!submitLoading && (
-								<label
-									className='pos--abs d--flex ai--center jc--center font--xl round cursor--pointer rightbar__upload-button'
-									htmlFor='file-input'>
-									<i className='fa fa-camera text--white'></i>
-								</label>
-							)}
-
-							{!submitLoading && (
-								<input id='file-input' className='d--none' type='file' accept='.jpg,jpeg,.png' onChange={upload} />
-							)}
-						</div>
-					</section>
-				)
-			}
-
-			<UpdateFormInputField
-				label='First name'
-				value={first_name}
-				disabled={submitLoading}
-				onChange={handleFirstnameValue}
-				error={(errors && errors.first_name) ? errors.first_name.properties.message : null}
-				autoFocus
-			/>
-			
-			<UpdateFormInputField
-				label='Last name'
-				value={last_name}
-				disabled={submitLoading}
-				onChange={handleLastnameValue}
-				error={(errors && errors.last_name) ? errors.last_name.properties.message : null}
-			/>
-
-			<UpdateFormInputField
-				label='Username'
-				value={username}
-				disabled={submitLoading}
-				onChange={handleUsernameValue}
-				error={(errors && errors.username) ? errors.username.properties.message : null}
-			/>
-
-			<button
-				className='btn btn--blue full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--lg'
-				disabled={submitLoading || nothingChanged}>
-				Update
-			</button>
-
-			<button
-				className='btn btn--secondary full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--md'
-				type='button'
-				disabled={submitLoading}
-				onClick={clickEvent}>
-				Cancel
-			</button>
-		</form>
+					</div>
+				</section>
+			)}
+		</Fragment>
 	)
 }
 

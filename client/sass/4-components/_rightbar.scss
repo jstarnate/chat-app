@@ -12,6 +12,11 @@
 		width: 100px;
 	}
 
+	&__avatar-container {
+		@include size(106px);
+		border: 3px solid var(--blue);
+	}
+
 	&__upload-button {
 		@include coords(0, null, null, 0);
 		@include size(100%);
@@ -21,9 +26,5 @@
 		&:hover {
 			opacity: 1;
 		}
-	}
-
-	&__loading-image {
-		@include size(100px);
 	}
 }

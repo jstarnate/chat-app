@@ -1,6 +1,8 @@
 import React, { useState, useEffect, Fragment } from 'react'
+import { useDispatch } from 'react-redux'
 import { get as axiosGet } from 'axios'
 import { func } from 'prop-types'
+import { set } from 'Actions'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
@@ -10,6 +12,7 @@ const localStorageUser = JSON.parse(localStorage.getItem('user'))
 function ProfileInfo({ clickEvent }) {
 	const [user, setUser] = useState({})
 	const [loading, setLoading] = useState(false)
+	const dispatch = useDispatch()
 
 	useEffect(() => {
 		if (localStorageUser)
@@ -31,6 +34,11 @@ function ProfileInfo({ clickEvent }) {
 			})
 	}
 
+	function confirmSignout() {
+		dispatch(set('showLogoutModal', true))
+	}
+
+
 	if (loading) {
 		return <Spinner />
 	}
@@ -38,7 +46,7 @@ function ProfileInfo({ clickEvent }) {
 	return (
 		<Fragment>
 			<div className='text--center'>
-				<div className='d--ib'>
+				<div className='d--ib round rightbar__avatar-container'>
 					{
 						!user.image_path && user.gender === 'Male' ? (
 							<MaleDefaultAvatar />
@@ -62,7 +70,11 @@ function ProfileInfo({ clickEvent }) {
 			</div>
 
 			<button className='btn btn--blue full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--lg' onClick={clickEvent}>
-				Edit
+				Edit info
+			</button>
+
+			<button className='btn btn--secondary full-width b-rad--sm pd-t--xs pd-b--xs mg-t--md' onClick={confirmSignout}>
+				Sign out
 			</button>
 		</Fragment>
 	)

@@ -1,21 +1,29 @@
 import React from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { func } from 'prop-types'
 import { set } from 'Actions'
 
-function Header({ confirmSignout }) {
+export default function() {
 	const showSidebar = useSelector(state => state.showSidebar)
+	const showRightbar = useSelector(state => state.showRightbar)
 	const dispatch = useDispatch()
 
 	function sidebarToggle() {
 		dispatch(set('showSidebar', !showSidebar))
 	}
 
+	function showInfo() {
+		dispatch(set('showRightbar', true))
+	}
+
+	function hideInfo() {
+		dispatch(set('showRightbar', false))
+	}
+
 	return (
 		<header className='pos--sticky bg--blue header'>
 			<div className='d--flex ai--center pd-t--md pd-b--md pd-l--lg pd-r--lg header__wrap'>
 				<button className='btn header__bars' onClick={sidebarToggle}>
-					<i className='fa fa-bars font--md text--white'></i>
+					<i className='fa fa-th-list font--md text--white'></i>
 				</button>
 
 				<a className='pos--abs header__logo' href='/home'>
@@ -26,17 +34,19 @@ function Header({ confirmSignout }) {
 						<path d="M182 90.6916C198.639 79.1277 207.402 79.078 222 90.6916" stroke="white" strokeWidth="10"/>
 					</svg>
 				</a>
-				
-				<button className='btn font--lg mg-l--auto' title='Sign out' onClick={confirmSignout}>
-					<i className='fa fa-sign-out text--white'></i>
-				</button>
+
+				{
+					showRightbar ? (
+						<button className='btn font--lg mg-l--auto header__arrow' title='Show profile info' onClick={hideInfo}>
+							<i className='fa fa-chevron-right text--white'></i>
+						</button>
+					) : (
+						<button className='btn font--lg mg-l--auto header__arrow' title='Hide profile info' onClick={showInfo}>
+							<i className='fa fa-chevron-left text--white'></i>
+						</button>
+					)
+				}
 			</div>
 		</header>
 	)
 }
-
-Header.propTypes = {
-	confirmSignout: func.isRequired
-}
-
-export default Header

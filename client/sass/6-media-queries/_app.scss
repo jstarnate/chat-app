@@ -4,17 +4,18 @@
 	}
 }
 
+@media only screen and (min-width: 768px) {
+	.header {
+		height: 54px;
+		
+		&__bars, &__arrow {
+			display: none;
+		}
+	}
+}
+
 @media only screen and (max-width: 768px) {
 	.header {
-		&__bars {
-			display: inline-block;
-		}
-
-		&__arrow {
-			display: block;
-			margin-left: auto;
-		}
-
 		&__signout {
 			margin-left: var(--space-md);
 		}

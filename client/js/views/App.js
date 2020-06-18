@@ -1,5 +1,5 @@
-import React, { useEffect, Fragment } from 'react'
-import { useDispatch } from 'react-redux'
+import React, { useState, useEffect, Fragment } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { get as axiosGet } from 'axios'
 import socket from 'socket.io-client'
 import { set } from 'Actions'
@@ -14,6 +14,9 @@ function clearLocalStorage() {
 }
 
 export default function() {
+	const [width, setWidth] = useState(null)
+	const showSidebar = useSelector(state => state.showSidebar)
+	const showRightbar = useSelector(state => state.showRightbar)
 	const dispatch = useDispatch()
 	const io = socket(`${process.env.APP_URL}/contacts`) // TODO: If fails, add { reconnection: false }
 
@@ -28,17 +31,29 @@ export default function() {
 					console.error(err)
 				})
 		}
+
+		applyViewportWidth()
+		window.addEventListener('resize', applyViewportWidth)
 	}, [])
 
-	function confirmSignout() {
-		dispatch(set('showSidebar', false))
-		dispatch(set('showRightbar', false))
-		dispatch(set('showLogoutModal', true))
+	useEffect(() => {
+		if (width > 768 && showSidebar) {
+			dispatch(set('showSidebar', false))
+		}
+
+		if (width > 768 && showRightbar) {
+			dispatch(set('showRightbar', false))
+		}
+	}, [width, showSidebar, showRightbar])
+
+
+	function applyViewportWidth() {
+		setWidth(window.innerWidth)
 	}
 
 	return (
 		<Fragment>
-			<Header confirmSignout={confirmSignout} />
+			<Header />
 
 			<section data-testid='container' className='d--flex'>
 				<Sidebar />
