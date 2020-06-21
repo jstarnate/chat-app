@@ -8,7 +8,9 @@ import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
 import { set, add, updateStatus } from 'Actions'
 
-const localStorageUser = JSON.parse(localStorage.getItem('user'))
+const axiosConfig = {
+    headers: { Authorization: sessionStorage.getItem('jwt-token') }
+}
 
 export default function() {
 	const [loading, setLoading] = useState(false)
@@ -51,15 +53,18 @@ export default function() {
 	}, [contacts])
 
 	function getUserId() {
-		if (localStorageUser) {
-			setUserId(localStorageUser._id)
-			io.emit('user connects', localStorageUser._id)
+		if (localStorage.getItem('user')) {
+			const id = JSON.parse(localStorage.getItem('user'))._id
+			
+			setUserId(id)
+			io.emit('user connects', id)
 		}
 		else {
-			axiosGet('/api/user').then(({ data }) => {
-				setUserId(data.user._id)
-				io.emit('user connects', data.user._id)
-			})
+			axiosGet('/api/user', axiosConfig)
+				.then(({ data }) => {
+					setUserId(data.user._id)
+					io.emit('user connects', data.user._id)
+				})
 		}
 	}
 
@@ -67,7 +72,7 @@ export default function() {
 		setLoading(true)
 		setFinished(false)
 
-		axiosGet('/api/user/contacts')
+		axiosGet('/api/user/contacts', axiosConfig)
 			.then(({ data }) => {
 				if (isMounted) {
 					dispatch(set('contacts', data.contacts))

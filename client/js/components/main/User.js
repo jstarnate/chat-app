@@ -1,23 +1,27 @@
 import React, { useState } from 'react'
 import { string, func } from 'prop-types'
 import { post as axiosPost } from 'axios'
-import socket from 'socket.io-client'
+import io from 'socket.io-client'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
 
-const io = socket(`${process.env.APP_URL}/contacts`)
+const socket = io(`${process.env.APP_URL}/contacts`)
 
 function User({ _id, first_name, last_name, username, gender, image_path, refreshEvent, removeEvent }) {
 	const [loading, setLoading] = useState(false)
 	const [success, setSuccess] = useState(false)
 
 	function requestChat() {
+		const config = {
+            headers: { Authorization: sessionStorage.getItem('jwt-token') }
+        }
+
 		setLoading(true)
 
-		axiosPost('/api/user/contacts/request', { id: _id })
+		axiosPost('/api/user/contacts/request', { id: _id }, config)
 			.then(() => {
-				io.emit('add request', _id)
+				socket.emit('add request', _id)
 
 				setSuccess(true)
 				setLoading(false)
@@ -27,11 +31,12 @@ function User({ _id, first_name, last_name, username, gender, image_path, refres
 				}, 1000)
 			})
 			.catch(error => {
-				setSuccess(false)
-				setLoading(false)
-
-				if (error.response.status === 422) {
-					refreshEvent()
+				if (error.response.status === 400) {
+					removeEvent(_id)
+				}
+				else {
+					setSuccess(false)
+					setLoading(false)
 				}
 			})
 	}

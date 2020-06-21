@@ -5,17 +5,26 @@ const userSchema = new Schema({
 	first_name: {
 		required: [true, 'First name is required.'],
 		type: String,
-		minlength: [2, 'Must be at least 2 characters long.']
+		trim: true,
+		minlength: [2, 'Must be at least 2 characters long.'],
+		set(value) {
+			return value.replace(/\b[a-z]/g, (match) => match.toUpperCase())
+		}
 	},
 	last_name: {
 		required: [true, 'Last name is required.'],
 		type: String,
-		minlength: [2, 'Must be at least 2 characters long.']
+		trim: true,
+		minlength: [2, 'Must be at least 2 characters long.'],
+		set(value) {
+			return value.replace(/\b[a-z]/g, (match) => match.toUpperCase())
+		}
 	},
 	username: {
 		required: [true, 'Username is required.'],
 		unique: true,
 		type: String,
+		trim: true,
 		minlength: [6, 'Must be at least 6 characters long.'],
 		maxlength: [20, 'Must not exceed to more than 20 characters.']
 	},
@@ -30,6 +39,7 @@ const userSchema = new Schema({
 	password: {
 		required: [true, 'Password is required.'],
 		type: String,
+		trim: true,
 		minlength: [8, 'Must be at least 8 characters long.']
 	},
 	online: {

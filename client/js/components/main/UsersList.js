@@ -12,9 +12,13 @@ export default function() {
 	}, [])
 
 	function getUsers() {
+		const config = {
+			headers: { Authorization: sessionStorage.getItem('jwt-token') }
+		}
+
 		setLoading(true)
 
-		axiosGet('/api/user/all')
+		axiosGet('/api/user/all', config)
 			.then(({ data }) => {
 				setUsers(data.users)
 				setLoading(false)

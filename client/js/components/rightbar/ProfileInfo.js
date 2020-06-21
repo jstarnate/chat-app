@@ -1,30 +1,32 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import { useDispatch } from 'react-redux'
 import { get as axiosGet } from 'axios'
-import { func } from 'prop-types'
 import { set } from 'Actions'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
 
-const localStorageUser = JSON.parse(localStorage.getItem('user'))
 
-function ProfileInfo({ clickEvent }) {
+export default function() {
 	const [user, setUser] = useState({})
 	const [loading, setLoading] = useState(false)
 	const dispatch = useDispatch()
 
 	useEffect(() => {
-		if (localStorageUser)
-			setUser(localStorageUser)
+		if (localStorage.getItem('user'))
+			setUser(JSON.parse(localStorage.getItem('user')))
 		else
 			getUser()
 	}, [])
 
 	function getUser() {
+		const config = {
+			headers: { Authorization: sessionStorage.getItem('jwt-token') }
+		}
+
 		setLoading(true)
 
-		axiosGet('/api/user')
+		axiosGet('/api/user', config)
 			.then(({ data }) => {
 				setUser(data.user)
 				setLoading(false)
@@ -32,6 +34,10 @@ function ProfileInfo({ clickEvent }) {
 			.catch(() => {
 				setLoading(false)
 			})
+	}
+
+	function enableEditMode() {
+		dispatch(set('editMode', true))
 	}
 
 	function confirmSignout() {
@@ -69,7 +75,7 @@ function ProfileInfo({ clickEvent }) {
 				<p className='text--bold mg-t--xs mg-b--auto'>{user.username}</p>
 			</div>
 
-			<button className='btn btn--blue full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--lg' onClick={clickEvent}>
+			<button className='btn btn--blue full-width text--bold b-rad--sm pd-t--xs pd-b--xs mg-t--lg' onClick={enableEditMode}>
 				Edit info
 			</button>
 
@@ -79,9 +85,3 @@ function ProfileInfo({ clickEvent }) {
 		</Fragment>
 	)
 }
-
-ProfileInfo.propTypes = {
-	clickEvent: func.isRequired
-}
-
-export default ProfileInfo

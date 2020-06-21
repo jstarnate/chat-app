@@ -9,7 +9,7 @@ export default function(initialValue) {
 	}
 
 	function handleError(obj) {
-		setError(obj ? obj.message : null)
+		setError(obj ? obj.properties.message : null)
 	}
 
 	const data = { value, error, onChangeEvent: handle.bind(null, modifyEvent) }

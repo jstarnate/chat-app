@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef, Fragment } from 'react'
 import { Prompt } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { post as axiosPost } from 'axios'
-import socket from 'socket.io-client'
+import io from 'socket.io-client'
 import { string } from 'prop-types'
 import { push } from 'Actions'
 
-const io = socket(`${process.env.APP_URL}/messages`)
+const socket = io(`${process.env.APP_URL}/messages`)
 
-function CommentBox({ id }) {
+function MessageBox({ id }) {
 	const [message, setMessage] = useState('')
 	const [isBlocking, setBlocking] = useState(false)
 	const dispatch = useDispatch()
@@ -22,10 +22,14 @@ function CommentBox({ id }) {
 	}, [id])
 
 	function sendMessage() {
-		axiosPost('/api/messages/store', { id, message })
+		const config = {
+			headers: { Authorization: sessionStorage.getItem('jwt-token') }
+		}
+
+		axiosPost('/api/messages/store', { id, message }, config)
 			.then(({ data }) => {
 				dispatch(push('messages', data.message))
-				io.emit('send message', { id, message: data.message })
+				socket.emit('send message', { id, message: data.message })
 				setMessage('')
 				textarea.current.value = ''
 			})
@@ -67,8 +71,8 @@ function CommentBox({ id }) {
 	)
 }
 
-CommentBox.propTypes = {
+MessageBox.propTypes = {
 	id: string.isRequired
 }
 
-export default CommentBox
+export default MessageBox

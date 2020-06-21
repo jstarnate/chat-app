@@ -16,15 +16,23 @@ class MessageController {
                     timestamp: moment(message.createdAt).format('L h:mm A')
                 }))
 
-                const user = await User.findById(request.query.id)
+                const user = await User.findById(request.query.id, 'first_name last_name gender image_path')
 
-                response.json({ messages, user: `${user.first_name} ${user.last_name}` })
+                response.json({
+                    messages,
+                    user: {
+                        first_name: user.first_name,
+                        last_name: user.last_name,
+                        gender: user.gender,
+                        image_path: user.image_path ? user.image_path.replace(/\/image\/upload\//, '/image/upload/w_29,h_29/') : null
+                    }
+                })
             })
     }
 
     async store(request, response) {
     	const convo = await Conversation.findOne({ users: { $in: [request.user, request.body.id] } })
-        const newMessage = new Message({ conversation: convo._id, user: request.user, body: request.body.message.trim() })
+        const newMessage = new Message({ conversation: convo._id, user: request.user, body: request.body.message })
 
     	convo.messages.push(newMessage._id)
     	

@@ -1,10 +1,12 @@
 import React, { useState, useEffect, Fragment } from 'react'
-import socket from 'socket.io-client'
+import io from 'socket.io-client'
 import { get as axiosGet } from 'axios'
 import { func } from 'prop-types'
 
-const localStorageUser = JSON.parse(localStorage.getItem('user'))
-const io = socket(`${process.env.APP_URL}/contacts`)
+const socket = io(`${process.env.APP_URL}/contacts`)
+const axiosConfig = {
+    headers: { Authorization: sessionStorage.getItem('jwt-token') }
+}
 
 function RequestTab({ changeEvent }) {
 	const [requestsCount, setRequestsCount] = useState(0)
@@ -13,34 +15,38 @@ function RequestTab({ changeEvent }) {
 	useEffect(() => {
 		getUserId()
 		getRequestsCount()
-		initializeSockets()
 	}, [])
 
+	useEffect(() => {
+		socket.on(`display request count ${userId}`, (number) => {
+			setRequestsCount(number)
+		})
+	}, [userId])
+
 	function getUserId() {
-		if (localStorageUser) {
-			setUserId(localStorageUser._id)
+		if (localStorage.getItem('user')) {
+			setUserId(JSON.parse(localStorage.getItem('user'))._id)
 		}
 		else {
-			axiosGet('/api/user').then(({ data }) => {
-				setUserId(data.user._id)
-			})
+			const config = {
+				headers: { Authorization: sessionStorage.getItem('jwt-token') }
+			}
+
+			axiosGet('/api/user', axiosConfig)
+				.then(({ data }) => {
+					setUserId(data.user._id)
+				})
 		}
 	}
 
 	function getRequestsCount() {
-		axiosGet('/api/user/requests/count')
+		axiosGet('/api/user/requests/count', axiosConfig)
 			.then(({ data }) => {
 				setRequestsCount(data.count)	
 			})
 			.catch(error => {
 				setRequestsCount(0)
 			})
-	}
-
-	function initializeSockets() {
-		io.on(`display request count ${userId}`, (number) => {
-			setRequestsCount(number)
-		})
 	}
 
 	return (
