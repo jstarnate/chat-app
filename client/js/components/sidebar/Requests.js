@@ -1,42 +1,40 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { get as axiosGet } from 'axios'
+import { set } from 'Actions'
 import Requester from './Requester'
 import Spinner from 'Utilities/Spinner'
 
 export default function() {
     const [loading, setLoading] = useState(false)
-    const [requests, setRequests] = useState([])
+    const requests = useSelector(state => state.requests)
+    const dispatch = useDispatch()
     let isMounted = false
 
     useEffect(() => {
         isMounted = true
-        
-        getRequests()
-
-        return () => {
-            isMounted = false
+        const config = {
+            headers: { Authorization: sessionStorage.getItem('jwt-token') }
         }
-    }, [])
-
-    const removeRequest = useCallback(id => {
-        const filtered = requests.filter(request => request._id !== id)
-        setRequests(filtered)
-    }, [])
-
-    function getRequests() {
+        
         setLoading(true)
 
-        axiosGet('/api/user/requests')
+        axiosGet('/api/user/requests', config)
             .then(({ data }) => {
                 if (isMounted) {
-                    setRequests(data.requests)
+                    dispatch(set('requests', data.requests))
                     setLoading(false)
                 }
             })
             .catch(() => {
                 setLoading(false)
             })
-    }
+
+        return () => {
+            isMounted = false
+        }
+    }, [])
+
 
     if (loading) {
         return <Spinner className='mg-t--md' />
@@ -52,7 +50,7 @@ export default function() {
 
     return (
         <section>
-            {requests.map(request => <Requester key={request._id} removeEvent={removeRequest} {...request} />)}
+            {requests.map(request => <Requester key={request._id} {...request} />)}
         </section>
     )
 }

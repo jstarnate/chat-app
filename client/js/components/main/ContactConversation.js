@@ -2,18 +2,20 @@ import React, { useState, useEffect, useRef, Fragment } from 'react'
 import { Prompt, useParams } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { get as axiosGet } from 'axios'
-import socket from 'socket.io-client'
+import io from 'socket.io-client'
 import Messages from './Messages'
-import CommentBox from './CommentBox'
+import MessageBox from './MessageBox'
+import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
+import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
 import { set, push } from 'Actions'
 
-const io = socket(`${process.env.APP_URL}/messages`)
+const socket = io(`${process.env.APP_URL}/messages`)
 
 export default function () {
 	const messages = useSelector(state => state.messages)
 	const [loading, setLoading] = useState(false)
-	const [user, setUser] = useState(null)
+	const [user, setUser] = useState({})
 	const dispatch = useDispatch()
 	const { id } = useParams()
 	const messagesContainer = useRef(null)
@@ -26,12 +28,12 @@ export default function () {
 	useEffect(() => {
 		const { _id } = JSON.parse(localStorage.getItem('user'))
 		
-		io.on(`receive message ${_id}`, (body) => {
+		socket.on(`receive message ${_id}`, (body) => {
 			dispatch(push('messages', body))
 		})
 
 		return () => {
-			io.disconnect()
+			socket.disconnect()
 		}
 	}, [])
 
@@ -46,9 +48,13 @@ export default function () {
 	}
 
 	function getUserAndMessages() {
+		const config = {
+			headers: { Authorization: sessionStorage.getItem('jwt-token') }
+		}
+
 		setLoading(true)
 
-		axiosGet(`/api/messages?id=${id}`)
+		axiosGet(`/api/messages?id=${id}`, config)
 			.then(({ data }) => {
 				setUser(data.user)
 				dispatch(set('messages', data.messages))
@@ -72,9 +78,16 @@ export default function () {
 
 	return (
 		<Fragment>
-			<header className='pos--sticky bg--pale bb--1 b--gray-60 pd--md main__header'>
-				<h4 className='d--ib'>{user}</h4>
-				<span className='d--ib bg--blue round mg-l--sm main__presence'></span>
+			<header className='pos--sticky d--flex ai--center bg--pale bb--1 b--gray-60 pd--sm main__header'>
+				{
+					!user.image_path && user.gender === 'Male' ? (
+						<MaleDefaultAvatar size={29} />
+					) : !user.image_path && user.gender === 'Female' ? (
+						<FemaleDefaultAvatar size={29} />
+					) : <img className='round' src={user.image_path} />
+				}
+
+				<h4 className='mg-l--sm'>{user.first_name} {user.last_name}</h4>
 			</header>
 
 			{
@@ -83,7 +96,7 @@ export default function () {
 				<section className='flex--1 pd-l--md pd-r--md main__conversation' />
 			}
 
-			<CommentBox id={id} />
+			<MessageBox id={id} />
 		</Fragment>
 	)
 }

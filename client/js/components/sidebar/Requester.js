@@ -1,29 +1,48 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import socket from 'socket.io-client'
+import React, { useState, useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import io from 'socket.io-client'
 import { post as axiosPost } from 'axios'
 import { string, func } from 'prop-types'
+import { remove } from 'Actions'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
 
-const user = JSON.parse(localStorage.getItem('user'))
-const io = socket(`${process.env.APP_URL}/contacts`)
+const socket = io(`${process.env.APP_URL}/contacts`)
+const axiosConfig = {
+    headers: { Authorization: sessionStorage.getItem('jwt-token') }
+}
 
-function Requester({ _id, first_name, last_name, gender, image_path, removeEvent }) {
+function Requester({ _id, first_name, last_name, gender, image_path }) {
 	const [loading, setLoading] = useState(false)
+	const dispatch = useDispatch()
+	const userId = JSON.parse(localStorage.getItem('user'))._id
 
-	const acceptOrRemove = useCallback((url, channelName, data) => {
+	function accept() {
 		setLoading(true)
 
-		axiosPost(url, { id: _id })
-			.then(({ data }) => {
-				io.emit(channelName, data)
-				removeEvent(_id)
+		axiosPost('/api/user/contacts/accept', { id: _id }, axiosConfig)
+			.then(response => {
+				dispatch(remove('requests', _id))
+				socket.emit('request accepted', { authUserId: userId, requesterId: _id })
 			})
 			.catch(() => {
 				setLoading(false)
 			})
-	}, [])
+	}
+
+	function removeRequest() {
+		setLoading(true)
+
+		axiosPost('/api/user/contacts/remove_request', { id: _id }, axiosConfig)
+			.then(response => {
+				dispatch(remove('requests', _id))
+				socket.emit('request removed', userId)
+			})
+			.catch(() => {
+				setLoading(false)
+			})
+	}
 
 	return (
 		<div className='d--flex ai--center pd--md sidebar__list-item'>
@@ -45,15 +64,12 @@ function Requester({ _id, first_name, last_name, gender, image_path, removeEvent
 	            <div className='mg-l--auto'>
 	                <button
 	                	className='btn btn--blue text--bold curved pd-t--xs pd-b--xs pd-l--sm pd-r--sm'
-	                	onClick={acceptOrRemove.bind(null, '/api/user/contacts/accept', 'request accepted', {
-							authUserId: user._id,
-							requesterId: _id
-						})}>
+	                	onClick={accept}>
 	                    <i className='fa fa-plus text--white'></i>
 	                </button>
 	                <button
 	                	className='btn btn--secondary text--bold curved pd-t--xs pd-b--xs pd-l--sm pd-r--sm mg-l--sm'
-	                	onClick={acceptOrRemove.bind(null, '/api/user/contacts/remove_request', 'request removed', user._id)}>
+	                	onClick={removeRequest}>
 	                    <i className='fa fa-trash'></i>
 	                </button>
 	            </div>
@@ -67,8 +83,7 @@ Requester.propTypes = {
 	first_name: string.isRequired,
 	last_name: string.isRequired,
 	gender: string.isRequired,
-	image_path: string,
-	removeEvent: func.isRequired
+	image_path: string
 }
 
 export default Requester

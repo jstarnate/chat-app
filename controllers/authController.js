@@ -1,4 +1,5 @@
 import passport from 'passport'
+import { sign as jwtSign } from 'jsonwebtoken'
 import { hashSync } from 'bcrypt'
 import User from '../models/User'
 
@@ -23,34 +24,42 @@ class AuthController {
 		if (!password)
 			return this.createResponseError(response, null, 'Password is required.')
 
-		passport.authenticate('local', (err, user, info) => {
-			if (err) return next(err)
+		passport.authenticate('signin', (error, user, info) => {
+			if (error) return next(error)
 			
 			if (!user || !user.validPassword(password))
 				return response.status(422).json({ auth: 'Incorrect combination.' })
 
-			request.logIn(user._id, (err) => {
+			request.login(user._id, (err) => {
 				if (err) return next(err)
-				return response.status(200).json({ auth: 'Login successful!' })
+
+				jwtSign({ sub: user._id }, process.env.JWT_SECRET, (jwtError, token) => {
+					if (jwtError) throw jwtError
+					return response.status(200).json({ token: `Bearer ${token}` })
+				})
 			})
 		})(request, response, next)
 	}
 
 	register(request, response) {
-		User.create(request.body, (error, user) => {
+		const { password, ...body } = request.body
+		body.password = hashSync(password, 10)
+
+		User.create(body, (error, user) => {
 			if (error) return response.status(422).json(error.errors)
 
-			user.first_name = user.first_name.trim().replace(/\b[a-z]/g, (match) => match.toUpperCase())
-			user.last_name = user.last_name.trim().replace(/\b[a-z]/g, (match) => match.toUpperCase())
-			user.password = hashSync(user.password, 10)
-
-			return response.status(200).json({ message: 'Success!' })
+			request.login(user._id, (err) => {
+				jwtSign({ sub: user._id }, process.env.JWT_SECRET, (jwtError, token) => {
+					if (jwtError) throw jwtError
+					return response.status(200).json({ token: `Bearer ${token}` })
+				})
+			})
 		})
 	}
 
 	logout(request, response) {
 		request.logout()
-		response.redirect('/index')
+		return response.status(200).send('Logged out.')
 	}
 
 }

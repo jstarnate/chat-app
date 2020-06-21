@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useCallback, Fragment } from 'react'
+import { useDispatch } from 'react-redux'
 import { post as axiosPost, put as axiosPut, delete as axiosDelete } from 'axios'
-import { func } from 'prop-types'
+import { set } from 'Actions'
 import UpdateFormInputField from './UpdateFormInputField'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Pulse from 'Utilities/Pulse'
 
 const user = JSON.parse(localStorage.getItem('user'))
+const axiosConfig = {
+    headers: { Authorization: sessionStorage.getItem('jwt-token') }
+}
 
-function UpdateInfoForm({ clickEvent }) {
+export default function() {
 	const [first_name, setFirstname] = useState(user.first_name)
 	const [last_name, setLastname] = useState(user.last_name)
 	const [username, setUsername] = useState(user.username)
@@ -17,14 +21,16 @@ function UpdateInfoForm({ clickEvent }) {
 	const [submitLoading, setSubmitLoading] = useState(false)
 	const [errors, setErrors] = useState(null)
 	const [showModal, setShowModal] = useState(false)
+	const dispatch = useDispatch()
 	const nothingChanged = user.first_name === first_name &&
 						   user.last_name === last_name &&
-						   user.username === username
+						   user.username === username &&
+						   user.image_path === image.path
 
 	useEffect(() => {
 		return () => {
 			if (user.image_path !== image.path) {
-				axiosDelete(`/api/user/upload/delete-image?id=${image.id}`)
+				axiosDelete(`/api/user/upload/delete-image?id=${image.id}`, axiosConfig)
 			}
 		}
 	}, [image.path])
@@ -48,7 +54,7 @@ function UpdateInfoForm({ clickEvent }) {
 
 		const requestBody = { first_name, last_name, username, image_path: image.path }
 
-		axiosPut('/api/user/update', requestBody)
+		axiosPut('/api/user/update', requestBody, axiosConfig)
 			.then(() => {
 				const { _id, gender } = user
 
@@ -64,7 +70,11 @@ function UpdateInfoForm({ clickEvent }) {
 	function upload(event) {
 		setImageLoading(true)
 
-		const config = { headers: {'Content-Type': 'multipart/form-data'} }
+		const config = {headers: {
+			'Content-Type': 'multipart/form-data',
+			Authorization: sessionStorage.getItem('jwt-token')
+		}}
+		
 		const formData = new FormData()
 
 		formData.append('image', event.target.files[0])
@@ -79,16 +89,12 @@ function UpdateInfoForm({ clickEvent }) {
 			})
 	}
 
-	function closeModal() {
-		setShowModal(false)
-	}
-
 	function cancel() {
 		if (!(nothingChanged && user.image_path === image.path)) {
-			setShowModal(true)
+			dispatch(set('showCancelEditModeModal', true))
 		}
 		else {
-			clickEvent()
+			dispatch(set('editMode', false))
 		}
 	}
 
@@ -170,24 +176,6 @@ function UpdateInfoForm({ clickEvent }) {
 					Cancel
 				</button>
 			</form>
-
-			{showModal && (
-				<section className='d--flex ai--center jc--center overlay'>
-					<div className='bg--white b-rad--md overlay__modal'>
-						<p className='font--lg pd--md'>Are you sure you want to cancel?</p>
-						<div className='d--flex jc--end bt--1 b--gray-40 pd--sm'>
-							<button className='btn btn--secondary curved pd-t--xs pd-b--xs pd-l--md pd-r--md' onClick={closeModal}>No</button>
-							<button className='btn btn--danger text--bold curved pd-t--xs pd-b--xs pd-l--md pd-r--md mg-l--sm' onClick={clickEvent}>Cancel</button>
-						</div>
-					</div>
-				</section>
-			)}
 		</Fragment>
 	)
 }
-
-UpdateInfoForm.propTypes = {
-	clickEvent: func.isRequired
-}
-
-export default UpdateInfoForm

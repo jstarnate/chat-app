@@ -15,7 +15,8 @@ export default function() {
 		setLoading(true)
 
 		post('/signin', { username, password })
-			.then(() => {
+			.then(({ data }) => {
+				sessionStorage.setItem('jwt-token', data.token)
 				location = '/home'
 			})
 			.catch(error => {

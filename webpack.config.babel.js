@@ -107,7 +107,7 @@ if (!devMode) {
 		splitChunks: {
 			cacheGroups: {
 				vendor: {
-					test: /[\\/]node_modules[\\/]((axios|react|prop-types|redux|socket.io).*)[\\/]/,
+					test: /[\\/]node_modules[\\/]((axios|react|prop-types|redux|socket.io-client).*)[\\/]/,
 					name: 'vendor',
 					chunks: 'all'
 				}

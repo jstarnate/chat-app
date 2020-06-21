@@ -74,24 +74,31 @@ class UserController {
 		}
 	}
 
-	async requestChat(request, response) {
-		try {
-			await Promise.all([
-				User.updateOne(
-					{ _id: request.user },
-					{ $push: { sentRequests: { $each: [request.body.id], $position: 0 } } }
-				),
-				User.updateOne(
-					{ _id: request.body.id },
-					{ $push: { receivedRequests: { $each: [request.user], $position: 0 } } }
-				)
-			])
+	requestChat(request, response) {
+		User.findOne({ _id: request.user }, async (err, user) => {
+			if (user.receivedRequests.indexOf(request.body.id) !== -1) {
+				return response.status(400).send('Resource already exists.')
+			}
+			else {
+				try {
+					await Promise.all([
+						User.updateOne(
+							{ _id: request.user },
+							{ $push: { sentRequests: { $each: [request.body.id], $position: 0 } } }
+						),
+						User.updateOne(
+							{ _id: request.body.id },
+							{ $push: { receivedRequests: { $each: [request.user], $position: 0 } } }
+						)
+					])
 
-			response.json({ message: 'Success!' })
-		}
-		catch (error) {
-			response.status(403).json({ message: 'User already sent you a chat request' })
-		}
+					return response.json({ message: 'Success!' })
+				}
+				catch (error) {
+					return response.status(403).json({ message: 'User already sent you a chat request' })
+				}
+			}
+		})
 	}
 
 	async acceptRequest(request, response) {

@@ -22,7 +22,8 @@ export default function() {
 		setLoading(true)
 
 		post('/signup', { first_name, last_name, username, gender, password })
-			.then(() => {
+			.then(({ data }) => {
+				sessionStorage.setItem('jwt-token', data.token)
 				location = '/index'
 			})
 			.catch(error => {

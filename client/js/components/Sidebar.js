@@ -3,19 +3,8 @@ import { useSelector } from 'react-redux'
 import Spinner from 'Utilities/Spinner'
 
 const Requests = lazy(() => import('Components/sidebar/Requests'))
-const Contacts = lazy(() => (
-	Promise.all([
-		import('Components/sidebar/Contacts'),
-		new Promise(resolve => setTimeout(resolve, 300))
-	]).then(([module]) => module)
-))
-const RequestTab = lazy(() => (
-	Promise.all([
-		import('./sidebar/RequestTab'),
-		new Promise(resolve => setTimeout(resolve, 300))
-	]).then(([module]) => module)
-))
-
+const Contacts = lazy(() => import('Components/sidebar/Contacts'))
+const RequestTab = lazy(() => import('./sidebar/RequestTab'))
 const currentTab = localStorage.getItem('currentTab')
 
 
