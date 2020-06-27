@@ -38,7 +38,7 @@ export default function() {
 	}
 
 	if (!loading && !users.length) {
-		return <h2 className='text--center'>No users</h2>
+		return <h2 className='text--center mg-t--md'>No users</h2>
 	}
 
 	return (

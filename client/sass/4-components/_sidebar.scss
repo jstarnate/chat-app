@@ -16,6 +16,11 @@
 		}
 	}
 
+	&__contacts {
+		height: calc(100vh - 105px);
+		overflow-y: auto;
+	}
+
 	&__list-item {
 		&:hover {
 			background: var(--pale);

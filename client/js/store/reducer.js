@@ -5,12 +5,28 @@ export default (state, action) => {
 	}
 
 	if (action.type === 'ADD') {
-		state[action.name] = [ action.payload, ...state[action.name] ]
+		if (action.payload.constructor === Array)
+			state[action.name] = [ ...action.payload, ...state[action.name] ]
+		else
+			state[action.name] = [ action.payload, ...state[action.name] ]
+		
 		return state
 	}
 
 	if (action.type === 'PUSH') {
 		state[action.name] = [ ...state[action.name], action.payload ]
+		return state
+	}
+
+	if (action.type === 'UPDATE') {
+		state[action.name] = state[action.name].map(item => {
+			if (item._id === action.id) {
+				item = action.payload
+			}
+
+			return item
+		})
+
 		return state
 	}
 

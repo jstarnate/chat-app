@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react'
 import { Prompt, useParams } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { get as axiosGet } from 'axios'
+import { get as axiosGet, post as axiosPost } from 'axios'
 import io from 'socket.io-client'
 import Messages from './Messages'
 import MessageBox from './MessageBox'
@@ -11,6 +11,9 @@ import Spinner from 'Utilities/Spinner'
 import { set, push } from 'Actions'
 
 const socket = io(`${process.env.APP_URL}/messages`)
+const axiosConfig = {
+	headers: { Authorization: sessionStorage.getItem('jwt-token') }
+}
 
 export default function () {
 	const messages = useSelector(state => state.messages)
@@ -21,7 +24,7 @@ export default function () {
 	const messagesContainer = useRef(null)
 
 	useEffect(() => {
-		getUserAndMessages()
+		getContactInfoAndMessages()
 		dispatch(set('showSidebar', false))
 	}, [id])
 
@@ -31,15 +34,12 @@ export default function () {
 		socket.on(`receive message ${_id}`, (body) => {
 			dispatch(push('messages', body))
 		})
-
-		return () => {
-			socket.disconnect()
-		}
 	}, [])
 
 	useEffect(() => {
 		scrollToBottom()
 	}, [messages])
+
 
 	function scrollToBottom() {
 		if (messagesContainer.current && messagesContainer.current.scrollHeight > messagesContainer.current.clientHeight) {
@@ -47,22 +47,21 @@ export default function () {
 		}
 	}
 
-	function getUserAndMessages() {
-		const config = {
-			headers: { Authorization: sessionStorage.getItem('jwt-token') }
-		}
-
+	function getContactInfoAndMessages() {
 		setLoading(true)
 
-		axiosGet(`/api/messages?id=${id}`, config)
-			.then(({ data }) => {
-				setUser(data.user)
-				dispatch(set('messages', data.messages))
-				setLoading(false)
-
-				scrollToBottom()
-			})
+		Promise.all([
+			axiosGet(`/api/user/contact-info?id=${id}`, axiosConfig),
+			axiosPost('/api/messages', { date: new Date() }, axiosConfig)
+		])
+		.then(([infoResponse, messagesResponse]) => {
+			setUser(infoResponse.data.user)
+			dispatch(set('messages', messagesResponse.data.messages))
+			setLoading(false)
+			scrollToBottom()
+		})
 	}
+
 
 	if (loading) {
 		return (
@@ -90,12 +89,7 @@ export default function () {
 				<h4 className='mg-l--sm'>{user.first_name} {user.last_name}</h4>
 			</header>
 
-			{
-				!!messages.length ?
-				<Messages ref={messagesContainer} messages={messages} /> :
-				<section className='flex--1 pd-l--md pd-r--md main__conversation' />
-			}
-
+			<Messages ref={messagesContainer} />
 			<MessageBox id={id} />
 		</Fragment>
 	)

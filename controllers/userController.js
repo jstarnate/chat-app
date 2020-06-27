@@ -24,6 +24,21 @@ class UserController {
 		}
 	}
 
+	async getContactInfo(request, response) {
+		try {
+			const user = await User.findById(request.query.id, 'first_name last_name gender image_path')
+			response.status(200).json({user: {
+				first_name: user.first_name,
+				last_name: user.last_name,
+				gender: user.gender,
+				image_path: user.image_path ? user.image_path.replace(/\/image\/upload\//, '/image/upload/w_29,h_29/') : null
+			}})
+		}
+		catch (error) {
+			response.status(500).send(error.message)
+		}
+	}
+
 	getAll(request, response) {
 		User.findById(request.user, async (err, user) => {
 			try {
@@ -143,23 +158,6 @@ class UserController {
 		catch (error) {
 			response.status(500).json({ message: 'An error occured while removing the request.' })
 		}
-	}
-
-	addContact(request, response) {
-		const convo = new Conversation({ users: [request.user, request.body.id] })
-
-		convo.save(async (err) => {
-			await Promise.all([
-				User.updateMany(
-					{ _id: { $in: [request.user, request.body.id] } },
-					{ $push: { conversations: convo._id } }
-				),
-				User.update({ _id: request.user }, { $push: { contacts: request.body.id } }),
-				User.update({ _id: request.body.id }, { $push: { contacts: request.user } })
-			])
-
-			response.json({ message: 'Success!' })
-		})
 	}
 
 	uploadImage(request, response) {

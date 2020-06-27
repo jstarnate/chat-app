@@ -1,53 +1,53 @@
+import { Types } from 'mongoose'
 import moment from 'moment'
 import User from '../models/User'
 import Message from '../models/Message'
 import Conversation from '../models/Conversation'
 
+const body = (name, isSelf) => ({
+    _id: name._id,
+    body: name.body,
+    isSelf,
+    timestamp: {
+        iso: name.createdAt,
+        standard: moment(name.createdAt).format('L h:mm A')
+    }
+})
+
 class MessageController {
     
-    async getConversationMessages(request, response) {
+    getConversationMessages(request, response) {
     	Conversation.findOne({ users: { $in: [request.user, request.query.id] } })
-            .populate({ path: 'messages', select: ['user', 'body', 'createdAt'] })
-            .exec(async (err, convo) => {
-                const messages = convo.messages.map(message => ({
-                    _id: message._id,
-                    body: message.body,
-                    isSelf: message.user.equals(request.user),
-                    timestamp: moment(message.createdAt).format('L h:mm A')
-                }))
+            .populate({
+                path: 'messages',
+                select: ['user', 'body', 'createdAt'],
+                match: { updatedAt: { $lt: new Date(request.body.date) } },
+                options: {
+                    sort: { createdAt: -1 },
+                    limit: 10
+                }
+            })
+            .exec((err, convo) => {
+                if (!convo.messages.length) {
+                    return response.json({ messages: [] })
+                }
 
-                const user = await User.findById(request.query.id, 'first_name last_name gender image_path')
+                const messages = convo.messages.map(message => body(message, message.user.equals(request.user._id))).reverse()
 
-                response.json({
-                    messages,
-                    user: {
-                        first_name: user.first_name,
-                        last_name: user.last_name,
-                        gender: user.gender,
-                        image_path: user.image_path ? user.image_path.replace(/\/image\/upload\//, '/image/upload/w_29,h_29/') : null
-                    }
-                })
+                return response.json({ messages })
             })
     }
 
     async store(request, response) {
     	const convo = await Conversation.findOne({ users: { $in: [request.user, request.body.id] } })
         const newMessage = new Message({ conversation: convo._id, user: request.user, body: request.body.message })
+        const pushMessage = User.updateOne({ _id: request.user }, { $push: { messages: newMessage._id } })
 
     	convo.messages.push(newMessage._id)
     	
-        await Promise.all([
-            convo.save(),
-            newMessage.save(),
-            User.updateOne({ _id: request.user }, { $push: { messages: newMessage._id } })
-        ])
+        await Promise.all([ convo.save(), newMessage.save(), pushMessage ])
 
-    	return response.json({ message: {
-    		_id: newMessage._id,
-    		body: newMessage.body,
-    		isSelf: true,
-    		timestamp: moment(newMessage.createdAt).format('L h:mm A')
-    	}})
+    	return response.json({ message: body(newMessage, true) })
     }
 
 }
