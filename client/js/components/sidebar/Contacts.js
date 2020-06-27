@@ -97,7 +97,7 @@ export default function() {
 			)}
 
 			{(!loading && finished && !!contacts.length) && (
-				<section>
+				<section className='sidebar__contacts'>
 					{contacts.map(contact => (
 						<NavLink
 							key={contact._id}

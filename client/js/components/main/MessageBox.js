@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux'
 import { post as axiosPost } from 'axios'
 import io from 'socket.io-client'
 import { string } from 'prop-types'
-import { push } from 'Actions'
+import { push, update } from 'Actions'
 
 const socket = io(`${process.env.APP_URL}/messages`)
 
@@ -25,16 +25,20 @@ function MessageBox({ id }) {
 		const config = {
 			headers: { Authorization: sessionStorage.getItem('jwt-token') }
 		}
+		const randomId = Math.floor(Math.random() * 1000000)
+		const dummyData = { _id: randomId, body: message, isSelf: true }
+
+		dispatch(push('messages', dummyData))
+		setMessage('')
+		textarea.current.value = ''
 
 		axiosPost('/api/messages/store', { id, message }, config)
 			.then(({ data }) => {
-				dispatch(push('messages', data.message))
+				dispatch(update('messages', randomId, data.message))
 				socket.emit('send message', { id, message: data.message })
-				setMessage('')
-				textarea.current.value = ''
 			})
 			.catch(() => {
-				console.log('An error occured while sending your message.')
+				dispatch(update('messages', randomId, { ...dummyData, notSent: true }))
 			})
 	}
 

@@ -38,10 +38,15 @@ export default (io) => {
 			if (connectedUsers.find(user => user.sid === disconnectId)) {
 				const authUser = connectedUsers.find(user => user.sid === disconnectId)
 
-				User.updateOne({ _id: authUser.userId }, { $set: { online: false } }, (err) => {
-					socket.broadcast.emit('offline user', authUser.userId)
-					connectedUsers = connectedUsers.filter(user => user.userId !== authUser.userId)
-				})
+				if (!!authUser.userId) {
+					User.updateOne({ _id: authUser.userId }, { $set: { online: false } }, (err) => {
+						socket.broadcast.emit('offline user', authUser.userId)
+						connectedUsers = connectedUsers.filter(user => user.userId !== authUser.userId)
+					})
+				}
+				else {
+					connectedUsers = connectedUsers.filter(user => user.sid !== disconnectId)
+				}
 			}
 		})
 	})

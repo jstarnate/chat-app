@@ -3,6 +3,7 @@ export default {
 	contacts: [],
 	requests: [],
 	messages: [],
+	date: null,
 	editMode: false,
 	showSidebar: false,
 	showRightbar: false,

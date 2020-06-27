@@ -8,6 +8,7 @@ const upload = multer({ dest: './storage' })
 router.get('/', userController.getAuthUser)
 router.get('/all', userController.getAll)
 router.get('/contacts', userController.getContacts)
+router.get('/contact-info', userController.getContactInfo)
 router.get('/requests', userController.getRequests)
 router.get('/requests/count', userController.getRequestsCount)
 
