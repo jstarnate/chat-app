@@ -14,7 +14,11 @@ export default (state, action) => {
 	}
 
 	if (action.type === 'PUSH') {
-		state[action.name] = [ ...state[action.name], action.payload ]
+		if (action.payload.constructor === Array)
+			state[action.name] = [ ...state[action.name], ...action.payload ]
+		else
+			state[action.name] = [ ...state[action.name], action.payload ]
+		
 		return state
 	}
 

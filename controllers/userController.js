@@ -55,14 +55,26 @@ class UserController {
 	}
 
 	getContacts(request, response) {
-		User.findById(request.user)
-			.populate({ path: 'contacts', select: ['_id', 'first_name', 'last_name', 'gender', 'image_path', 'online'] })
-			.exec((err, { contacts }) => {
-				if (err) {
-					return response.status(500).send('An error occured while fetching the contacts')
-				}
+		const match = request.body.date === null ? 
+					  { createdAt: { $lt: new Date() } } :
+					  { createdAt: { $gt: new Date(request.body.date) } }
 
-				return response.json({ contacts })
+		User.findById(request.user)
+			.populate({
+				path: 'conversations',
+				populate: {
+					path: 'users',
+					select: ['first_name', 'last_name', 'gender', 'image_path', 'online'],
+					match: { _id: { $nin: [request.user._id] } }
+				},
+				match,
+				options: { limit: 10 }
+			})
+			.exec((err, { conversations }) => {
+				const contacts = conversations.map(c => c.users[0])
+				const date = conversations.length ? conversations[conversations.length - 1].createdAt : null
+				
+				return response.json({ contacts, date })
 			})
 	}
 
@@ -117,32 +129,38 @@ class UserController {
 	}
 
 	async acceptRequest(request, response) {
+		const convo = new Conversation({ requester: request.body.id, acceptor: request.user._id, users: [request.user._id, request.body.id], messages: [] })
 		const updateAuthUser = User.updateOne(
-			{ _id: request.user },
+			{ _id: request.user._id },
 			{
 				$pull: { receivedRequests: request.body.id },
-				$push: { contacts: { $each: [request.body.id], $position: 0 } }
+				$push: {
+					contacts: { $each: [request.body.id], $position: 0 },
+					conversations: { $each: [convo._id], $position: 0 }
+				}
 			}
 		)
 
 		const updateRequester = User.updateOne(
 			{ _id: request.body.id },
 			{
-				$pull: { sentRequests: request.user },
-				$push: { contacts: { $each: [request.user], $position: 0 } }
+				$pull: { sentRequests: request.user._id },
+				$push: {
+					contacts: { $each: [request.user._id], $position: 0 },
+					conversations: { $each: [convo._id], $position: 0 }
+				}
 			}
 		)
 
 		try {
 			await Promise.all([ updateAuthUser, updateRequester ])
-			const convo = new Conversation({ users: [request.user, request.body.id] })
 
-			convo.save(err => {
+			convo.save((err) => {
 				response.json({ message: 'Success' })
 			})
 		}
 		catch (error) {
-			response.status(500).json({ message: 'An error occured while accepting the request.' })
+			response.status(500).send(error)
 		}
 	}
 
