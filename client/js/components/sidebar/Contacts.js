@@ -1,38 +1,59 @@
-import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { NavLink } from 'react-router-dom'
 import socket from 'socket.io-client'
-import { get as axiosGet } from 'axios'
+import { get as axiosGet, post as axiosPost } from 'axios'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
-import { set, add, updateStatus } from 'Actions'
+import { add, push, updateStatus } from 'Actions'
 
 const axiosConfig = {
     headers: { Authorization: sessionStorage.getItem('jwt-token') }
 }
 
 export default function() {
-	const [loading, setLoading] = useState(false)
-	const [finished, setFinished] = useState(null)
 	const [userId, setUserId] = useState(null)
+	const [loading, setLoading] = useState(false)
+	const [date, setDate] = useState(null)
 	const contacts = useSelector(state => state.contacts)
 	const dispatch = useDispatch()
+	const container = useRef(null)
+	const target = useRef(null)
 	const io = socket(`${process.env.APP_URL}/contacts`)
-	let isMounted = false
+
+	const ioCallback = useCallback((entries, observer) => {
+		if (entries[0].isIntersecting) {
+			setLoading(true)
+
+			axiosPost('/api/user/contacts', { date }, axiosConfig)
+				.then(({ data }) => {
+					if (data.contacts.length) {
+						dispatch(push('contacts', data.contacts))
+						setDate(data.date)
+					}
+					else {
+						observer.unobserve(target.current)
+					}
+
+					setLoading(false)
+				})
+		}
+	}, [contacts, date])
 
 	useEffect(() => {
-		isMounted = true
-
-		if (!contacts.length)
-			getContacts()
-		else
-			setFinished(true)
-
-		getUserId()
-
-		return () => {
-			isMounted = false
+		if (localStorage.getItem('user')) {
+			const id = JSON.parse(localStorage.getItem('user'))._id
+			
+			setUserId(id)
+			io.emit('user connects', id)
+		}
+		else {
+			axiosGet('/api/user', axiosConfig)
+				.then(({ data }) => {
+					setUserId(data.user._id)
+					io.emit('user connects', data.user._id)
+				})
 		}
 	}, [])
 
@@ -47,78 +68,69 @@ export default function() {
 			dispatch(updateStatus(id, false))
 		})
 
-		io.on(`add to contacts ${userId}`, (user) => {
-			dispatch(add('contacts', user))
+		io.on('add to contacts', (data) => {
+			if (userId !== data.requester._id) {
+				dispatch(add('contacts', data.requester))
+			}
+
+			if (userId !== data.acceptor._id) {
+				dispatch(add('contacts', data.acceptor))
+			}
 		})
 	}, [contacts])
 
-	function getUserId() {
-		if (localStorage.getItem('user')) {
-			const id = JSON.parse(localStorage.getItem('user'))._id
-			
-			setUserId(id)
-			io.emit('user connects', id)
+	useEffect(() => {
+		const options = {
+			root: container.current,
+			rootMargin: '0px',
+			threshold: 1.0
 		}
-		else {
-			axiosGet('/api/user', axiosConfig)
-				.then(({ data }) => {
-					setUserId(data.user._id)
-					io.emit('user connects', data.user._id)
-				})
+
+		const observer = new IntersectionObserver(ioCallback, options)
+
+		if (target && target.current) {
+			observer.observe(target.current)
 		}
-	}
 
-	function getContacts() {
-		setLoading(true)
-		setFinished(false)
+		return () => {
+			observer.disconnect()
+		}
+	}, [ioCallback])
 
-		axiosGet('/api/user/contacts', axiosConfig)
-			.then(({ data }) => {
-				if (isMounted) {
-					dispatch(set('contacts', data.contacts))
-					setLoading(false)
-					setFinished(true)
-				}
-			})
-			.catch(() => {
-				setLoading(false)
-				setFinished(null)
-			})
-	}
 
 	return (
 		<Fragment>
-			{loading && <Spinner className='mg-t--sm' />}
+			<section ref={container} className='sidebar__contacts'>
+				{contacts.map(contact => (
+					<NavLink
+						key={contact._id}
+						to={`/home/contacts/${contact._id}`}
+						className='d--flex ai--center pd--md sidebar__list-item'
+						activeClassName='active'>
+						{
+							!contact.image_path && contact.gender === 'Male' ? (
+								<MaleDefaultAvatar size={35} />
+							) : !contact.image_path && contact.gender === 'Female' ? (
+								<FemaleDefaultAvatar size={35} />
+							) : (
+								<img className='d--block round sidebar__avatar' src={contact.image_path} alt='Avatar' />
+							)
+						}
+						
+						<span className='text--bold mg-l--sm sidebar__item-info'>{contact.first_name} {contact.last_name}</span>
+						{ contact.online && <span className='bg--blue round mg-l--auto sidebar__right-side'></span> }
+					</NavLink>
+				))}
 
-			{(!loading && finished && !contacts.length) && (
+				<div ref={target}></div>
+
+				{ loading && <Spinner className='mg-t--sm' /> }
+			</section>
+
+			{(!loading && !contacts.length) && (
 				<p className='font--lg text--gray-20 text--bold text--center pd--md'>
 					You don't have any contact.
 				</p>
-			)}
-
-			{(!loading && finished && !!contacts.length) && (
-				<section className='sidebar__contacts'>
-					{contacts.map(contact => (
-						<NavLink
-							key={contact._id}
-							to={`/home/contacts/${contact._id}`}
-							className='d--flex ai--center pd--md sidebar__list-item'
-							activeClassName='active'>
-							{
-								!contact.image_path && contact.gender === 'Male' ? (
-									<MaleDefaultAvatar size={35} />
-								) : !contact.image_path && contact.gender === 'Female' ? (
-									<FemaleDefaultAvatar size={35} />
-								) : (
-									<img className='d--block round sidebar__avatar' src={contact.image_path} alt='Avatar' />
-								)
-							}
-							
-							<span className='text--bold mg-l--sm sidebar__item-info'>{contact.first_name} {contact.last_name}</span>
-							{ contact.online && <span className='bg--blue round mg-l--auto sidebar__right-side'></span> }
-						</NavLink>
-					))}
-				</section>
 			)}
 		</Fragment>
 	)

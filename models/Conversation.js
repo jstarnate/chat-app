@@ -1,7 +1,15 @@
 import { Schema, model } from 'mongoose'
 
 const conversationSchema = new Schema({
-    users: [
+    requester: {
+		type: Schema.Types.ObjectId,
+		ref: 'User'
+	},
+	acceptor: {
+		type: Schema.Types.ObjectId,
+		ref: 'User'
+	},
+	users: [
         { type: Schema.Types.ObjectId, ref: 'User' }
     ],
     messages: [

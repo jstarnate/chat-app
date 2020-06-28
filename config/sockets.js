@@ -21,10 +21,13 @@ export default (io) => {
 		})
 
 		socket.on('request accepted', async (data) => {
-			const user = await User.findById(data.authUserId, 'first_name last_name gender image_path receivedRequests')
+			const [acceptor, requester] = await Promise.all([
+				User.findById(data.authUserId, 'first_name last_name gender image_path online receivedRequests'),
+				User.findById(data.requesterId, 'first_name last_name gender image_path online')
+			])
 
-			socket.broadcast.emit(`add to contacts ${data.requesterId}`, user)
-			socket.broadcast.emit(`display request count ${data.authUserId}`, user.receivedRequests.length)
+			socket.broadcast.emit('add to contacts', { acceptor, requester })
+			socket.broadcast.emit(`display request count ${data.authUserId}`, acceptor.receivedRequests.length)
 		})
 
 		socket.on('request removed', async (id) => {

@@ -9,7 +9,7 @@ const seeds = [
 	}
 ]
 
-const models = ['User', 'Message']
+const models = ['User', 'Conversation', 'Message']
 
 seeder.connect(process.env.MONGO_URI, { useUnifiedTopology: true }, () => {
 	seeder.loadModels(models.map(model => path.resolve(__dirname, `../models/${model}.js`)))

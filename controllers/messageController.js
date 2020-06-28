@@ -21,7 +21,7 @@ class MessageController {
             .populate({
                 path: 'messages',
                 select: ['user', 'body', 'createdAt'],
-                match: { updatedAt: { $lt: new Date(request.body.date) } },
+                match: { createdAt: { $lt: new Date(request.body.date) } },
                 options: {
                     sort: { createdAt: -1 },
                     limit: 10
