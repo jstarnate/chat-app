@@ -25,7 +25,7 @@ export default (app) => {
 	/*
 	* AUTH
 	*/
-	app.get(['/home', '/home/contacts/:id'], authMiddleware, (request, response) => (
+	app.get(['/home', '/home/contacts'], authMiddleware, (request, response) => (
 		response.sendFile(path.resolve(__dirname, '../dist/app.html'))
 	))
 	

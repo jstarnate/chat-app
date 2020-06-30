@@ -7,14 +7,10 @@ const upload = multer({ dest: './storage' })
 
 router.get('/', userController.getAuthUser)
 router.get('/all', userController.getAll)
-router.post('/contacts', userController.getContacts)
 router.get('/contact-info', userController.getContactInfo)
-router.get('/requests', userController.getRequests)
-router.get('/requests/count', userController.getRequestsCount)
 
-router.post('/contacts/request', userController.requestChat)
-router.post('/contacts/accept', userController.acceptRequest)
-router.post('/contacts/remove_request', userController.removeRequest)
+router.post('/contacts', userController.getContacts)
+router.post('/contacts/add', userController.addToContacts)
 router.post('/upload', upload.single('image'), userController.uploadImage)
 
 router.put('/update', userController.update)

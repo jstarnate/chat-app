@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react'
-import { Prompt, useParams } from 'react-router-dom'
+import { Prompt, useLocation } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { get as axiosGet, post as axiosPost } from 'axios'
 import io from 'socket.io-client'
@@ -20,13 +20,14 @@ export default function () {
 	const [loading, setLoading] = useState(false)
 	const [user, setUser] = useState({})
 	const dispatch = useDispatch()
-	const { id } = useParams()
+	const location = useLocation()
+	const query = new URLSearchParams(location.search)
 	const messagesContainer = useRef(null)
 
 	useEffect(() => {
 		getContactInfoAndMessages()
 		dispatch(set('showSidebar', false))
-	}, [id])
+	}, [location])
 
 	useEffect(() => {
 		const { _id } = JSON.parse(localStorage.getItem('user'))
@@ -51,8 +52,8 @@ export default function () {
 		setLoading(true)
 
 		Promise.all([
-			axiosGet(`/api/user/contact-info?id=${id}`, axiosConfig),
-			axiosPost('/api/messages', { date: new Date() }, axiosConfig)
+			axiosGet(`/api/user/contact-info?id=${query.get('userId')}`, axiosConfig),
+			axiosPost('/api/messages', { id: query.get('convoId'), date: new Date() }, axiosConfig)
 		])
 		.then(([infoResponse, messagesResponse]) => {
 			setUser(infoResponse.data.user)
@@ -80,9 +81,9 @@ export default function () {
 			<header className='pos--sticky d--flex ai--center bg--pale bb--1 b--gray-60 pd--sm main__header'>
 				{
 					!user.image_path && user.gender === 'Male' ? (
-						<MaleDefaultAvatar size={29} />
+						<MaleDefaultAvatar size={33} />
 					) : !user.image_path && user.gender === 'Female' ? (
-						<FemaleDefaultAvatar size={29} />
+						<FemaleDefaultAvatar size={33} />
 					) : <img className='round' src={user.image_path} />
 				}
 
@@ -90,7 +91,7 @@ export default function () {
 			</header>
 
 			<Messages ref={messagesContainer} />
-			<MessageBox id={id} />
+			<MessageBox id={query.get('userId')} />
 		</Fragment>
 	)
 }

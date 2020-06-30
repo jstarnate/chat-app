@@ -54,12 +54,6 @@ const userSchema = new Schema({
 	],
 	contacts: [
 		{ type: Schema.Types.ObjectId, ref: 'User' }
-	],
-	sentRequests: [
-		{ type: Schema.Types.ObjectId, ref: 'User' }
-	],
-	receivedRequests: [
-		{ type: Schema.Types.ObjectId, ref: 'User' }
 	]
 }, {
 	timestamps: true

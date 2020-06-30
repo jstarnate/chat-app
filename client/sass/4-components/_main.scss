@@ -44,7 +44,7 @@
 
 	&__modal-overlay {
 		@include coords(0, null, null, 0);
-		@include size(100vw, calc(100vh - 49px));
+		@include size(100vw, calc(100vh - 54px));
 		background: rgba(0, 0, 0, 0.5);
 	}
 }

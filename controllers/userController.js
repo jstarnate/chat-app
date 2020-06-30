@@ -31,7 +31,7 @@ class UserController {
 				first_name: user.first_name,
 				last_name: user.last_name,
 				gender: user.gender,
-				image_path: user.image_path ? user.image_path.replace(/\/image\/upload\//, '/image/upload/w_29,h_29/') : null
+				image_path: user.image_path ? user.image_path.replace(/\/image\/upload\//, '/image/upload/w_33,h_33/') : null
 			}})
 		}
 		catch (error) {
@@ -43,7 +43,7 @@ class UserController {
 		User.findById(request.user, async (err, user) => {
 			try {
 				const users = await User.find(
-					{ _id: { $nin: [request.user, ...user.sentRequests, ...user.receivedRequests, ...user.contacts] } },
+					{ _id: { $nin: [request.user, ...user.contacts] } },
 					'first_name last_name username gender image_path'
 				)
 				response.status(200).json({ users })
@@ -55,10 +55,6 @@ class UserController {
 	}
 
 	getContacts(request, response) {
-		const match = request.body.date === null ? 
-					  { createdAt: { $lt: new Date() } } :
-					  { createdAt: { $gt: new Date(request.body.date) } }
-
 		User.findById(request.user)
 			.populate({
 				path: 'conversations',
@@ -67,28 +63,18 @@ class UserController {
 					select: ['first_name', 'last_name', 'gender', 'image_path', 'online'],
 					match: { _id: { $nin: [request.user._id] } }
 				},
-				match,
-				options: { limit: 10 }
+				match: { createdAt: { $lt: new Date(request.body.date) } },
+				options: {
+					sort: { createdAt: -1 },
+					limit: 10
+				}
 			})
 			.exec((err, { conversations }) => {
-				const contacts = conversations.map(c => c.users[0])
+				const contacts = conversations.map(c => ({ _id: c._id, user: c.users[0] }))
 				const date = conversations.length ? conversations[conversations.length - 1].createdAt : null
-				
+
 				return response.json({ contacts, date })
 			})
-	}
-
-	getRequests(request, response) {
-		User.findById(request.user, { receivedRequests: 1, _id: 0 })
-			.populate({ path: 'receivedRequests', select: ['first_name', 'last_name', 'gender', 'image_path'] })
-			.exec((err, user) => {
-				return response.json({ requests: user.receivedRequests })
-			})
-	}
-
-	async getRequestsCount(request, response) {
-		const { receivedRequests } = await User.findById(request.user)
-		return response.json({ count: receivedRequests.length })
 	}
 
 	async update(request, response) {
@@ -101,81 +87,30 @@ class UserController {
 		}
 	}
 
-	requestChat(request, response) {
-		User.findOne({ _id: request.user }, async (err, user) => {
-			if (user.receivedRequests.indexOf(request.body.id) !== -1) {
-				return response.status(400).send('Resource already exists.')
+	addToContacts(request, response) {
+		User.findById(request.user._id, async (err, user) => {
+			if (user.contacts.indexOf(request.body.id) !== -1) {
+				return response.status(400).send('User already exists in your contacts.')
 			}
-			else {
-				try {
-					await Promise.all([
-						User.updateOne(
-							{ _id: request.user },
-							{ $push: { sentRequests: { $each: [request.body.id], $position: 0 } } }
-						),
-						User.updateOne(
-							{ _id: request.body.id },
-							{ $push: { receivedRequests: { $each: [request.user], $position: 0 } } }
-						)
-					])
 
-					return response.json({ message: 'Success!' })
-				}
-				catch (error) {
-					return response.status(403).json({ message: 'User already sent you a chat request' })
-				}
+			const convo = new Conversation({ adder: request.user._id, added: request.body.id, users: [request.user._id, request.body.id], messages: [] })
+			
+			try {
+				await Promise.all([
+					User.updateOne({ _id: request.user._id }, { $push: { contacts: request.body.id, conversations: convo._id } }),
+					User.updateOne({ _id: request.body.id }, { $push: { contacts: request.user._id, conversations: convo._id } })
+				])
+
+				convo.save((err) => {
+					User.findById(request.body.id, 'first_name last_name gender image_path online', (err, user) => {
+						response.json({ contact: { _id: convo._id, user, createdAt: convo.createdAt } })
+					})
+				})
+			}
+			catch (error) {
+				response.status(500).send(error)
 			}
 		})
-	}
-
-	async acceptRequest(request, response) {
-		const convo = new Conversation({ requester: request.body.id, acceptor: request.user._id, users: [request.user._id, request.body.id], messages: [] })
-		const updateAuthUser = User.updateOne(
-			{ _id: request.user._id },
-			{
-				$pull: { receivedRequests: request.body.id },
-				$push: {
-					contacts: { $each: [request.body.id], $position: 0 },
-					conversations: { $each: [convo._id], $position: 0 }
-				}
-			}
-		)
-
-		const updateRequester = User.updateOne(
-			{ _id: request.body.id },
-			{
-				$pull: { sentRequests: request.user._id },
-				$push: {
-					contacts: { $each: [request.user._id], $position: 0 },
-					conversations: { $each: [convo._id], $position: 0 }
-				}
-			}
-		)
-
-		try {
-			await Promise.all([ updateAuthUser, updateRequester ])
-
-			convo.save((err) => {
-				response.json({ message: 'Success' })
-			})
-		}
-		catch (error) {
-			response.status(500).send(error)
-		}
-	}
-
-	async removeRequest(request, response) {
-		try {
-			await Promise.all([
-				User.updateOne({ _id: request.user }, { $pull: { receivedRequests: request.body.id } }),
-				User.updateOne({ _id: request.body.id }, { $pull: { sentRequests: request.user } })
-			])
-			
-			response.json({ message: 'Request removed.' })
-		}
-		catch (error) {
-			response.status(500).json({ message: 'An error occured while removing the request.' })
-		}
 	}
 
 	uploadImage(request, response) {

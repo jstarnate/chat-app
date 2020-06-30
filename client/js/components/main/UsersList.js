@@ -8,10 +8,6 @@ export default function() {
 	const [loading, setLoading] = useState(false)
 	
 	useEffect(() => {
-		getUsers()
-	}, [])
-
-	function getUsers() {
 		const config = {
 			headers: { Authorization: sessionStorage.getItem('jwt-token') }
 		}
@@ -26,12 +22,13 @@ export default function() {
 			.catch(() => {
 				setLoading(false)
 			})
-	}
+	}, [])
 
 	function removeUser(id) {
 		const filtered = users.filter(user => user._id !== id)
 		setUsers(filtered)
 	}
+
 
 	if (loading) {
 		return <Spinner className='mg-t--md' />
@@ -43,9 +40,7 @@ export default function() {
 
 	return (
 		<section className='pd--md main__users'>
-			{users.map(user => (
-				<User key={user._id} removeEvent={removeUser} refreshEvent={getUsers} {...user} />
-			))}
+			{users.map(user => <User key={user._id} removeEvent={removeUser} {...user} />)}
 		</section>
 	)
 }

@@ -1,16 +1,19 @@
 import React, { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { string, func } from 'prop-types'
 import { post as axiosPost } from 'axios'
 import io from 'socket.io-client'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
+import { add } from 'Actions'
 
 const socket = io(`${process.env.APP_URL}/contacts`)
 
-function User({ _id, first_name, last_name, username, gender, image_path, refreshEvent, removeEvent }) {
+function User({ _id, first_name, last_name, username, gender, image_path, removeEvent }) {
 	const [loading, setLoading] = useState(false)
 	const [success, setSuccess] = useState(false)
+	const dispatch = useDispatch()
 
 	function requestChat() {
 		const config = {
@@ -19,10 +22,14 @@ function User({ _id, first_name, last_name, username, gender, image_path, refres
 
 		setLoading(true)
 
-		axiosPost('/api/user/contacts/request', { id: _id }, config)
-			.then(() => {
-				socket.emit('add request', _id)
+		axiosPost('/api/user/contacts/add', { id: _id }, config)
+			.then(({ data }) => {
+				socket.emit('added to contacts', {
+					adderId: JSON.parse(localStorage.getItem('user'))._id,
+					addedId: _id
+				})
 
+				dispatch(add('contacts', data.contact))
 				setSuccess(true)
 				setLoading(false)
 
@@ -85,7 +92,6 @@ User.propTypes = {
 	username: string.isRequired,
 	gender: string.isRequired,
 	image_path: string,
-	refreshEvent: func.isRequired,
 	removeEvent: func.isRequired
 }
 
