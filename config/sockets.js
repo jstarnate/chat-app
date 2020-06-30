@@ -1,4 +1,5 @@
 import User from '../models/User'
+import Conversation from '../models/Conversation'
 
 export default (io) => {
 
@@ -15,24 +16,22 @@ export default (io) => {
 			}
 		})
 
-		socket.on('add request', async (id) => {
-			const user = await User.findById(id)
-			socket.broadcast.emit(`display request count ${id}`, user.receivedRequests.length)
-		})
+		socket.on('added to contacts', (data) => {
+			Conversation.findOne({ users: { $in: [data.adderId, data.addedId] } })
+				.populate({
+					path: 'users',
+					select: ['first_name', 'last_name', 'gender', 'image_path', 'online'],
+					match: { _id: data.adderId }
+				})
+				.exec((err, convo) => {
+					const contact = {
+						_id: convo._id,
+						user: convo.users[0],
+						createdAt: convo.createdAt
+					}
 
-		socket.on('request accepted', async (data) => {
-			const [acceptor, requester] = await Promise.all([
-				User.findById(data.authUserId, 'first_name last_name gender image_path online receivedRequests'),
-				User.findById(data.requesterId, 'first_name last_name gender image_path online')
-			])
-
-			socket.broadcast.emit('add to contacts', { acceptor, requester })
-			socket.broadcast.emit(`display request count ${data.authUserId}`, acceptor.receivedRequests.length)
-		})
-
-		socket.on('request removed', async (id) => {
-			const user = await User.findById(id)
-			socket.broadcast.emit(`display request count ${id}`, user.receivedRequests.length)
+					socket.broadcast.emit('add to contacts', { id: data.addedId, contact })
+				})
 		})
 
 		socket.on('disconnect', () => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { post } from 'axios'
 import InputField from 'Utilities/InputField'
-import useInput from '../hooks/useInput'
+import useInput from 'Hooks/useInput'
 
 export default function() {
 	const [first_name, firstnameData, setFirstnameError] = useInput(null)

@@ -2,18 +2,9 @@
 	width: 300px;
 
 	&__wrap {
-		@include coords(55px, null, null, 0);
+		@include coords(54px, null, null, 0);
 		width: inherit;
-		min-height: calc(100vh - 55px);
-	}
-
-	&__tab {
-		width: 50%;
-		cursor: pointer;
-
-		&.active, &.active > span {
-			color: var(--blue);
-		}
+		min-height: calc(100vh - 54px);
 	}
 
 	&__contacts {
@@ -47,10 +38,5 @@
 
 	&__right-side {
 		@include size(10px);
-	}
-
-	&__remove-button {
-		padding: 0;
-		margin: 0 0 0 auto;
 	}
 }

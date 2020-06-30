@@ -6,6 +6,4 @@ export const push = (name, payload) => ({ type: 'PUSH', name, payload })
 
 export const update = (name, id, payload) => ({ type: 'UPDATE', name, id, payload })
 
-export const updateStatus = (id, boolean) => ({ type: 'UPDATE_STATUS', id, boolean })
-
 export const remove = (name, id) => ({ type: 'DELETE', name, id })

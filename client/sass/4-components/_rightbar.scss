@@ -1,11 +1,10 @@
 .rightbar {
-	$this: &;
 	width: 200px;
 
 	&__wrap {
-		@include coords(55px, 0, null, null);
+		@include coords(54px, 0, null, null);
 		width: inherit;
-		min-height: calc(100vh - 55px);
+		min-height: calc(100vh - 54px);
 	}
 
 	&__avatar {

@@ -6,15 +6,16 @@ import UsersList from 'Components/main/UsersList'
 
 export default function() {
 	const showSidebar = useSelector(state => state.showSidebar)
+	const showRightbar = useSelector(state => state.showRightbar)
 	
 	return (
 		<section className='pos--rel flex--1 main'>
 			<Switch>
 				<Route exact path='/home' children={<UsersList />} />
-				<Route path='/home/contacts/:id' children={<ContactConversation />} />
+				<Route path='/home/contacts' children={<ContactConversation />} />
 			</Switch>
 
-			{ showSidebar && <div className='pos--abs main__modal-overlay'></div> }
+			{ (showSidebar || showRightbar) && <div className='pos--abs main__modal-overlay'></div> }
 		</section>
 	)
 }

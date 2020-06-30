@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { set } from 'Actions'
 
@@ -7,12 +7,17 @@ export default function() {
 	const showRightbar = useSelector(state => state.showRightbar)
 	const dispatch = useDispatch()
 
-	function sidebarToggle() {
+	const sidebarToggle = useCallback(() => {
 		dispatch(set('showSidebar', !showSidebar))
-	}
+		
+		if (!showSidebar) {
+			dispatch(set('showRightbar', false))
+		}
+	}, [showSidebar])
 
 	function showInfo() {
 		dispatch(set('showRightbar', true))
+		dispatch(set('showSidebar', false))
 	}
 
 	function hideInfo() {

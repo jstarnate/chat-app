@@ -17,7 +17,7 @@ const body = (name, isSelf) => ({
 class MessageController {
     
     getConversationMessages(request, response) {
-    	Conversation.findOne({ users: { $in: [request.user, request.query.id] } })
+    	Conversation.findById(request.body.id)
             .populate({
                 path: 'messages',
                 select: ['user', 'body', 'createdAt'],
