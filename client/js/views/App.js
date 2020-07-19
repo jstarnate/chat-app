@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { get as axiosGet, post as axiosPost } from 'axios'
-import socket from 'socket.io-client'
+import io from 'socket.io-client'
 import { set } from 'Actions'
 import Header from 'Components/Header'
 import Sidebar from 'Components/Sidebar'
@@ -19,14 +19,14 @@ export default function() {
 	const showSidebar = useSelector(state => state.showSidebar)
 	const showRightbar = useSelector(state => state.showRightbar)
 	const dispatch = useDispatch()
-	const io = socket(`${process.env.APP_URL}/contacts`)
+	const socket = io(`${process.env.APP_URL}/contacts`)
 
 	useEffect(() => {
 		if (!localStorage.getItem('user')) {
 			axiosGet('/api/user', axiosConfig)
 				.then(({ data }) => {
 					localStorage.setItem('user', JSON.stringify(data.user))
-					io.emit('user connects', data.user._id)
+					socket.emit('user connects', data.user._id)
 				})
 				.catch(err => {
 					console.error(err)
@@ -81,7 +81,7 @@ export default function() {
 	}
 
 	return (
-		<Fragment>
+		<main>
 			<Header />
 
 			<section data-testid='container' className='d--flex'>
@@ -114,6 +114,6 @@ export default function() {
 					</button>
 				</Fragment>
 			</Modal>
-		</Fragment>
+		</main>
 	)
 }

@@ -3,9 +3,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import path from 'path'
 
-const { CLIENT_PORT, SERVER_PORT, NODE_ENV } = process.env
-const serverPort = SERVER_PORT || 8000
-const clientPort = CLIENT_PORT || 3000
+const { APP_URL, CLIENT_PORT, NODE_ENV } = process.env
 const devMode = NODE_ENV === 'development'
 
 const config = {
@@ -58,7 +56,7 @@ const config = {
 		}
 	},
 	plugins: [
-		new EnvironmentPlugin({ APP_URL: 'http://localhost:8000' }),
+		new EnvironmentPlugin({ APP_URL }),
 		new MiniCssExtractPlugin({
 			filename: '[name].css'
 		}),
@@ -83,19 +81,19 @@ const config = {
 if (devMode) {
 	config.devServer = {
 		hot: true,
-		port: clientPort,
+		port: CLIENT_PORT || 3000,
 		historyApiFallback: false,
 		contentBase: path.resolve(__dirname, 'dist'),
 		writeToDisk: true,
 		proxy: {
-			'/': { target: `http://localhost:${serverPort}` },
-			'/api': { target: `http://localhost:${serverPort}/api` },
+			'/': { target: `${APP_URL}` },
+			'/api': { target: `${APP_URL}/api` },
 			'/contacts': {
-				target: `http://localhost:${serverPort}/contacts`,
+				target: `${APP_URL}/contacts`,
 				ws: true
 			},
 			'/messages': {
-				target: `http://localhost:${serverPort}/messages`,
+				target: `${APP_URL}/messages`,
 				ws: true
 			}
 		}

@@ -46,7 +46,7 @@ export default function() {
 						Sign in
 					</button>
 					
-					<a className='text--blue font--lg' href=''>I forgot my password</a>
+					<a className='text--info font--lg' href=''>I forgot my password</a>
 				</div>
 			</form>
 		</section>

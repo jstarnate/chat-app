@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import io from 'socket.io-client'
 import { get as axiosGet, post as axiosPost } from 'axios'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
@@ -112,13 +112,16 @@ export default function() {
 	return (
 		<aside className='sidebar'>
 			<div className={`pos--fixed bg--white br--1 b--gray-60 sidebar__wrap ${showSidebar ? 'show' : ''}`}>
-				<h3 className='text--blue pd--md'>Conversations {!!contacts.length && `● ${contacts.length}`}</h3>
+				<h3 className='d--flex ai--center jc--between pd--md'>
+					<span className='text--blue'>Conversations</span>
+					<span className='text--blue'>{contacts.length}</span>
+				</h3>
 				
 				<section ref={container} className='sidebar__contacts'>
 					{contacts.map(({ _id, user }) => (
 						<NavLink
 							key={_id}
-							to={`/home/contacts?convoId=${_id}&userId=${user._id}`}
+							to={`/home/contacts/${_id}/${user._id}`}
 							className='d--flex ai--center pd--md sidebar__list-item'
 							activeClassName='active'>
 							{

@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback, forwardRef, Fragment } from 'react'
+import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { post as axiosPost } from 'axios'
+import { string, bool } from 'prop-types'
 import Spinner from 'Utilities/Spinner'
 import { add } from 'Actions'
 
@@ -8,7 +9,7 @@ const axiosConfig = {
 	headers: { Authorization: sessionStorage.getItem('jwt-token') }
 }
 
-export default forwardRef((props, ref) => {
+const Messages = forwardRef((props, ref) => {
 	const [loading, setLoading] = useState(false)
 	const messages = useSelector(state => state.messages)
 	const dispatch = useDispatch()
@@ -18,7 +19,7 @@ export default forwardRef((props, ref) => {
 		if (entries[0].isIntersecting) {
 			setLoading(true)
 
-			axiosPost('/api/messages', { date: messages[0].timestamp.iso }, axiosConfig)
+			axiosPost('/api/messages', { id: props.id, date: messages[0].timestamp.iso }, axiosConfig)
 				.then(({ data }) => {
 					if (data.messages.length) {
 						dispatch(add('messages', data.messages))
@@ -57,11 +58,11 @@ export default forwardRef((props, ref) => {
 	}
 
 	return (
-		<Fragment>
-			<section ref={ref} className='flex--1 pd-l--md pd-r--md main__conversation'>
-				{ loading && <Spinner /> }
-				<div ref={target}></div>
+		<section ref={ref} className='pos--rel flex--1 main__conversation'>
+			{ loading && <Spinner /> }
+			{ props.scrollable && <div ref={target}></div> }
 
+			<div className='pos--sticky d--flex jc--end flex--column pd-l--md pd-r--md main__conversation-wrap'>
 				{messages.map(({ _id, body, isSelf, timestamp, notSent }) => (
 					<div key={_id} className={`pd-t--sm pd-b--sm ${isSelf ? 'text--right' : 'text--left'}`}>
 						{ !!timestamp && <span className='d--block font--sm text--gray-20'>{timestamp.standard}</span> }
@@ -71,7 +72,17 @@ export default forwardRef((props, ref) => {
 						{ !!notSent && <span className='font--sm text--danger'>Not sent</span> }
 					</div>
 				))}
-			</section>
-		</Fragment>
+
+				{ props.seen && <i className='fa fa-check-circle pos--abs text--success main__seen'></i> }
+			</div>
+		</section>
 	)
 })
+
+Messages.propTypes = {
+	id: string.isRequired,
+	seen: bool.isRequired,
+	scrollable: bool.isRequired
+}
+
+export default Messages

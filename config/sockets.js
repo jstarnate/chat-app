@@ -56,7 +56,14 @@ export default (io) => {
 	io.of('/messages').on('connection', (socket) => {
 		socket.on('send message', (data) => {
 			const { _id, body, timestamp } = data.message
-			socket.broadcast.emit(`receive message ${data.id}`, { _id, body, isSelf: false, timestamp })
+			
+			socket.broadcast.emit('receive message', { _id, body, receiverId: data.id, isSelf: false, timestamp })
+		})
+
+		socket.on('send user id', async (cid, uid) => {
+			await Conversation.updateOne({ _id: cid }, { $set: { seener: uid } })
+			socket.broadcast.emit('seen', cid, uid)
 		})
 	})
+	
 }

@@ -3,12 +3,12 @@ import { Prompt } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { post as axiosPost } from 'axios'
 import io from 'socket.io-client'
-import { string } from 'prop-types'
+import { string, func } from 'prop-types'
 import { push, update } from 'Actions'
 
 const socket = io(`${process.env.APP_URL}/messages`)
 
-function MessageBox({ id }) {
+function MessageBox({ convoId, userId, removeSeen }) {
 	const [message, setMessage] = useState('')
 	const [isBlocking, setBlocking] = useState(false)
 	const dispatch = useDispatch()
@@ -19,7 +19,7 @@ function MessageBox({ id }) {
 			setMessage('')
 			setBlocking(false)
 		}
-	}, [id])
+	}, [convoId])
 
 	function sendMessage() {
 		const config = {
@@ -32,10 +32,10 @@ function MessageBox({ id }) {
 		setMessage('')
 		textarea.current.value = ''
 
-		axiosPost('/api/messages/store', { id, message }, config)
+		axiosPost('/api/messages/store', { id: convoId, message }, config)
 			.then(({ data }) => {
 				dispatch(update('messages', randomId, data.message))
-				socket.emit('send message', { id, message: data.message })
+				socket.emit('send message', { id: userId, message: data.message })
 			})
 			.catch(() => {
 				dispatch(update('messages', randomId, { ...dummyData, notSent: true }))
@@ -48,6 +48,7 @@ function MessageBox({ id }) {
 
 			event.preventDefault()
 			sendMessage()
+			removeSeen()
 		}
 
 		return
@@ -76,7 +77,9 @@ function MessageBox({ id }) {
 }
 
 MessageBox.propTypes = {
-	id: string.isRequired
+	convoId: string.isRequired,
+	userId: string.isRequired,
+	removeSeen: func.isRequired
 }
 
 export default MessageBox
