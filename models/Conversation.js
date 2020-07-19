@@ -1,13 +1,17 @@
 import { Schema, model } from 'mongoose'
 
 const conversationSchema = new Schema({
-    requester: {
+    adder: {
 		type: Schema.Types.ObjectId,
 		ref: 'User'
 	},
-	acceptor: {
+	added: {
 		type: Schema.Types.ObjectId,
 		ref: 'User'
+	},
+	seener: {
+		type: String,
+		default: null
 	},
 	users: [
         { type: Schema.Types.ObjectId, ref: 'User' }

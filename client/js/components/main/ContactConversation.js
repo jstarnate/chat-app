@@ -1,79 +1,98 @@
 import React, { useState, useEffect, useRef, Fragment } from 'react'
-import { Prompt, useLocation } from 'react-router-dom'
+import { Prompt, useParams } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
-import { get as axiosGet, post as axiosPost } from 'axios'
+import { get as axiosGet, post as axiosPost, put as axiosPut } from 'axios'
 import io from 'socket.io-client'
 import Messages from './Messages'
 import MessageBox from './MessageBox'
 import MaleDefaultAvatar from 'Utilities/MaleDefaultAvatar'
 import FemaleDefaultAvatar from 'Utilities/FemaleDefaultAvatar'
 import Spinner from 'Utilities/Spinner'
+import LoadingMessagesContainer from 'Utilities/LoadingMessagesContainer'
 import { set, push } from 'Actions'
 
-const socket = io(`${process.env.APP_URL}/messages`)
 const axiosConfig = {
 	headers: { Authorization: sessionStorage.getItem('jwt-token') }
 }
 
 export default function () {
-	const messages = useSelector(state => state.messages)
-	const [loading, setLoading] = useState(false)
 	const [user, setUser] = useState({})
+	const [seen, setSeen] = useState(false)
+	const [scrollable, setScrollable] = useState(true)
+	const [loading, setLoading] = useState(false)
+	const messages = useSelector(state => state.messages)
 	const dispatch = useDispatch()
-	const location = useLocation()
-	const query = new URLSearchParams(location.search)
+	const { convoId, userId } = useParams()
 	const messagesContainer = useRef(null)
-
-	useEffect(() => {
-		getContactInfoAndMessages()
-		dispatch(set('showSidebar', false))
-	}, [location])
-
-	useEffect(() => {
-		const { _id } = JSON.parse(localStorage.getItem('user'))
-		
-		socket.on(`receive message ${_id}`, (body) => {
-			dispatch(push('messages', body))
-		})
-	}, [])
-
-	useEffect(() => {
-		scrollToBottom()
-	}, [messages])
-
-
-	function scrollToBottom() {
-		if (messagesContainer.current && messagesContainer.current.scrollHeight > messagesContainer.current.clientHeight) {
-			messagesContainer.current.scrollTo(0, messagesContainer.current.scrollHeight)
-		}
-	}
+	const socket = io(`${process.env.APP_URL}/messages`)
+	const { _id } = JSON.parse(localStorage.getItem('user'))
 
 	function getContactInfoAndMessages() {
 		setLoading(true)
 
 		Promise.all([
-			axiosGet(`/api/user/contact-info?id=${query.get('userId')}`, axiosConfig),
-			axiosPost('/api/messages', { id: query.get('convoId'), date: new Date() }, axiosConfig)
+			axiosGet(`/api/user/contact-info?id=${userId}`, axiosConfig),
+			axiosPost('/api/messages', { id: convoId, date: new Date() }, axiosConfig),
+			axiosGet(`/api/conversations/seen?convoId=${convoId}&userId=${userId}`, axiosConfig),
 		])
-		.then(([infoResponse, messagesResponse]) => {
+		.then(([infoResponse, messagesResponse, convoResponse]) => {
 			setUser(infoResponse.data.user)
 			dispatch(set('messages', messagesResponse.data.messages))
+			setSeen(!!convoResponse.data.seen)
 			setLoading(false)
 			scrollToBottom()
 		})
 	}
 
+	function scrollToBottom() {
+		const container = messagesContainer.current
+
+		if (container && container.scrollHeight > container.clientHeight) {
+			container.scrollTo(0, container.scrollHeight)
+		}
+		else {
+			setScrollable(false)
+		}
+	}
+
+	function removeSeen() {
+		axiosPut('/api/conversations/nullify-seener', { id: convoId }, axiosConfig)
+		setSeen(false)
+	}
+
+	useEffect(() => {
+		socket.on('receive message', (data) => {
+			const { receiverId, ...body } = data
+			
+			if (receiverId === _id) {
+				dispatch(push('messages', body))
+			}
+		})
+	}, [])
+
+	useEffect(() => {
+		getContactInfoAndMessages()
+		dispatch(set('showSidebar', false))
+	}, [convoId])
+
+	useEffect(() => {
+		if (messages.length && !messages[messages.length - 1].isSelf) {
+			setSeen(false)
+			socket.emit('send user id', convoId, _id)
+		}
+	}, [convoId, messages])
+
+	useEffect(() => {
+		socket.on('seen', (cid, uid) => {
+			if (convoId === cid && uid !== _id) {
+				setSeen(true)
+			}
+		})
+	}, [convoId])
+
 
 	if (loading) {
-		return (
-			<Fragment>
-				<header className='pos--sticky bg--pale bb--1 b--gray-60 pd--md main__header'>
-					<div className='bg--gray-60 main__name-placeholder'></div>
-				</header>
-
-				<Spinner className='mg-t--md' />
-			</Fragment>
-		)
+		return <LoadingMessagesContainer />
 	}
 
 	return (
@@ -90,8 +109,9 @@ export default function () {
 				<h4 className='mg-l--sm'>{user.first_name} {user.last_name}</h4>
 			</header>
 
-			<Messages ref={messagesContainer} />
-			<MessageBox id={query.get('userId')} />
+			<Messages ref={messagesContainer} id={convoId} seen={seen} scrollable={scrollable} />
+			
+			<MessageBox convoId={convoId} userId={userId} removeSeen={removeSeen} />
 		</Fragment>
 	)
 }

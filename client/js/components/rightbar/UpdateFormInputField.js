@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react'
+import React, { memo } from 'react'
 import { string, bool, func } from 'prop-types'
 
 function UpdateFormInputField({ label, error, ...restProps }) {

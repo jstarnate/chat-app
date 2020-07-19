@@ -15,7 +15,7 @@ const body = (name, isSelf) => ({
 })
 
 class MessageController {
-    
+
     getConversationMessages(request, response) {
     	Conversation.findById(request.body.id)
             .populate({
@@ -28,26 +28,23 @@ class MessageController {
                 }
             })
             .exec((err, convo) => {
-                if (!convo.messages.length) {
-                    return response.json({ messages: [] })
-                }
-
                 const messages = convo.messages.map(message => body(message, message.user.equals(request.user._id))).reverse()
 
                 return response.json({ messages })
             })
     }
 
-    async store(request, response) {
-    	const convo = await Conversation.findOne({ users: { $in: [request.user, request.body.id] } })
-        const newMessage = new Message({ conversation: convo._id, user: request.user, body: request.body.message })
-        const pushMessage = User.updateOne({ _id: request.user }, { $push: { messages: newMessage._id } })
+    store(request, response) {
+        Conversation.findById(request.body.id, async (err, convo) => {
+            const newMessage = new Message({ conversation: convo._id, user: request.user._id, body: request.body.message })
+            const pushMessage = User.updateOne({ _id: request.user._id }, { $push: { messages: newMessage._id } })
 
-    	convo.messages.push(newMessage._id)
-    	
-        await Promise.all([ convo.save(), newMessage.save(), pushMessage ])
+            convo.messages.push(newMessage._id)
+            
+            await Promise.all([ convo.save(), newMessage.save(), pushMessage ])
 
-    	return response.json({ message: body(newMessage, true) })
+            return response.json({ message: body(newMessage, true) })
+        })
     }
 
 }

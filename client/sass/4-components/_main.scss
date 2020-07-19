@@ -19,6 +19,10 @@
 		overflow-y: auto;
 	}
 
+	&__conversation-wrap {
+		@include coords(100%, null, null, 0);
+	}
+
 	&__message {
 		max-width: 50%;
 	}
@@ -30,6 +34,10 @@
 
 	&__message-box {
 		resize: none;
+	}
+
+	&__seen {
+		@include coords(null, 10px, 5px, null);
 	}
 
 	&__users {

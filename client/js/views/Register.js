@@ -45,7 +45,7 @@ export default function() {
 			<InputField id='username' label='Username' {...usernameData} />
 
 			<InputField id='password' label='Password' type={type} {...passwordData}>
-				<button data-testid='type-toggle' className='btn text--lightblue' type='button' onClick={toggleType}>
+				<button data-testid='type-toggle' className='btn text--info' type='button' onClick={toggleType}>
 					{ type === 'password' ? 'Show' : 'Hide' }
 				</button>
 			</InputField>
