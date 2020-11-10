@@ -1,18 +1,18 @@
 // SIZE
 .font--sm {
-	font-size: var(--font-sm);
+	font-size: $font--sm;
 }
 
 .font--md {
-	font-size: var(--font-md);
+	font-size: $font--md;
 }
 
 .font--lg {
-	font-size: var(--font-lg);
+	font-size: $font--lg;
 }
 
 .font--xl {
-	font-size: var(--font-xl);
+	font-size: $font--xl;
 }
 
 // WEIGHT

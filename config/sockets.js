@@ -1,69 +1,99 @@
-import User from '../models/User'
-import Conversation from '../models/Conversation'
+import User from '../models/User';
+import Conversation from '../models/Conversation';
 
-export default (io) => {
+export default io => {
+    io.of('/contacts').on('connection', socket => {
+        let connectedUsers = [];
 
-	io.of('/contacts').on('connection', (socket) => {
-		let connectedUsers = []
+        socket.on('user connects', id => {
+            if (!connectedUsers.find(user => user.userId === id)) {
+                connectedUsers.push({ userId: id, sid: socket.id });
 
-		socket.on('user connects', (id) => {
-			if (!connectedUsers.find(user => user.userId === id)) {
-				connectedUsers.push({ userId: id, sid: socket.id })
+                User.updateOne({ _id: id }, { $set: { online: true } }, () => {
+                    socket.broadcast.emit('online user', id);
+                });
+            }
+        });
 
-				User.updateOne({ _id: id }, { $set: { online: true } }, (err) => {
-					socket.broadcast.emit('online user', id)
-				})
-			}
-		})
+        socket.on('added to contacts', data => {
+            Conversation.findOne({
+                users: { $in: [data.adderId, data.addedId] },
+            })
+                .populate({
+                    path: 'users',
+                    select: [
+                        'first_name',
+                        'last_name',
+                        'gender',
+                        'image_path',
+                        'online',
+                    ],
+                    match: { _id: data.adderId },
+                })
+                .exec((err, convo) => {
+                    const contact = {
+                        _id: convo._id,
+                        user: convo.users[0],
+                        createdAt: convo.createdAt,
+                    };
 
-		socket.on('added to contacts', (data) => {
-			Conversation.findOne({ users: { $in: [data.adderId, data.addedId] } })
-				.populate({
-					path: 'users',
-					select: ['first_name', 'last_name', 'gender', 'image_path', 'online'],
-					match: { _id: data.adderId }
-				})
-				.exec((err, convo) => {
-					const contact = {
-						_id: convo._id,
-						user: convo.users[0],
-						createdAt: convo.createdAt
-					}
+                    socket.broadcast.emit('add to contacts', {
+                        id: data.addedId,
+                        contact,
+                    });
+                });
+        });
 
-					socket.broadcast.emit('add to contacts', { id: data.addedId, contact })
-				})
-		})
+        socket.on('disconnect', () => {
+            const disconnectId = socket.id;
 
-		socket.on('disconnect', () => {
-			const disconnectId = socket.id
+            if (connectedUsers.find(user => user.sid === disconnectId)) {
+                const authUser = connectedUsers.find(
+                    user => user.sid === disconnectId
+                );
 
-			if (connectedUsers.find(user => user.sid === disconnectId)) {
-				const authUser = connectedUsers.find(user => user.sid === disconnectId)
+                if (authUser.userId) {
+                    User.updateOne(
+                        { _id: authUser.userId },
+                        { $set: { online: false } },
+                        () => {
+                            socket.broadcast.emit(
+                                'offline user',
+                                authUser.userId
+                            );
+                            connectedUsers = connectedUsers.filter(
+                                user => user.userId !== authUser.userId
+                            );
+                        }
+                    );
+                } else {
+                    connectedUsers = connectedUsers.filter(
+                        user => user.sid !== disconnectId
+                    );
+                }
+            }
+        });
+    });
 
-				if (!!authUser.userId) {
-					User.updateOne({ _id: authUser.userId }, { $set: { online: false } }, (err) => {
-						socket.broadcast.emit('offline user', authUser.userId)
-						connectedUsers = connectedUsers.filter(user => user.userId !== authUser.userId)
-					})
-				}
-				else {
-					connectedUsers = connectedUsers.filter(user => user.sid !== disconnectId)
-				}
-			}
-		})
-	})
+    io.of('/messages').on('connection', socket => {
+        socket.on('send message', data => {
+            const { _id, body, timestamp } = data.message;
 
-	io.of('/messages').on('connection', (socket) => {
-		socket.on('send message', (data) => {
-			const { _id, body, timestamp } = data.message
-			
-			socket.broadcast.emit('receive message', { _id, body, receiverId: data.id, isSelf: false, timestamp })
-		})
+            socket.broadcast.emit('receive message', {
+                _id,
+                body,
+                receiverId: data.id,
+                isSelf: false,
+                timestamp,
+            });
+        });
 
-		socket.on('send user id', async (cid, uid) => {
-			await Conversation.updateOne({ _id: cid }, { $set: { seener: uid } })
-			socket.broadcast.emit('seen', cid, uid)
-		})
-	})
-	
-}
+        socket.on('send user id', async (cid, uid) => {
+            await Conversation.updateOne(
+                { _id: cid },
+                { $set: { seener: uid } }
+            );
+            socket.broadcast.emit('seen', cid, uid);
+        });
+    });
+};

@@ -1,21 +1,24 @@
-import Conversation from '../models/Conversation'
+import Conversation from '../models/Conversation';
 
 class ConversationController {
+    async getSeenStatus(request, response) {
+        const convo = await Conversation.findById(request.query.convoId);
 
-	async getSeenStatus(request, response) {
-		const convo = await Conversation.findById(request.query.convoId)
+        return response.json({
+            seen: convo.seener && convo.seener === request.query.userId,
+        });
+    }
 
-		return response.json({ seen: convo.seener && convo.seener === request.query.userId })
-	}
+    async nullifySeener(request, response) {
+        await Conversation.updateOne(
+            { _id: request.body.id },
+            { $set: { seener: null } }
+        );
 
-	async nullifySeener(request, response) {
-		await Conversation.updateOne({ _id: request.body.id }, { $set: { seener: null } })
-
-		return response.json({ success: true })
-	}
-
+        return response.json({ success: true });
+    }
 }
 
-const conversationController = new ConversationController
+const conversationController = new ConversationController();
 
-export default conversationController
+export default conversationController;

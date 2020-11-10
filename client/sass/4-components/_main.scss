@@ -43,7 +43,7 @@
 	&__users {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		grid-gap: var(--space-md);
+		grid-gap: $space--md;
 	}
 
 	&__user-image {

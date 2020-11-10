@@ -1,6 +1,4 @@
 .header {
-	top: 0;
-	z-index: 10;
 
 	&__wrap {
 		max-width: 1366px;
@@ -10,4 +8,5 @@
 		@include coords(50%, null, null, 50%);
 		transform: translate(-50%, -50%);
 	}
+	
 }

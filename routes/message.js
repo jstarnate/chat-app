@@ -1,10 +1,10 @@
-import { Router } from 'express'
-import messageController from '../controllers/messageController'
+import { Router } from 'express';
+import messageController from '../controllers/messageController';
 
-const router = Router()
+const router = Router();
 
-router.post('/', messageController.getConversationMessages)
+router.post('/', messageController.getConversationMessages);
 
-router.post('/store', messageController.store)
+router.post('/store', messageController.store);
 
-export default router
+export default router;

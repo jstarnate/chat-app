@@ -26,10 +26,6 @@
 		@include size(35px);
 	}
 
-	&__item-info {
-		width: 70%;
-	}
-
 	&__message {
 		text-overflow: ellipsis;
 		white-space: nowrap;

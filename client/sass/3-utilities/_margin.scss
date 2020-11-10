@@ -1,36 +1,36 @@
 // ALL SIDES
 .mg--xs {
-	margin: var(--space-xs);
+	margin: $space--xs;
 }
 
 .mg--sm {
-	margin: var(--space-sm);
+	margin: $space--sm;
 }
 
 .mg--md {
-	margin: var(--space-md);
+	margin: $space--md;
 }
 
 .mg--lg {
-	margin: var(--space-lg);
+	margin: $space--lg;
 }
 
 
 // TOP
 .mg-t--xs {
-	margin-top: var(--space-xs);
+	margin-top: $space--xs;
 }
 
 .mg-t--sm {
-	margin-top: var(--space-sm);
+	margin-top: $space--sm;
 }
 
 .mg-t--md {
-	margin-top: var(--space-md);
+	margin-top: $space--md;
 }
 
 .mg-t--lg {
-	margin-top: var(--space-lg);
+	margin-top: $space--lg;
 }
 
 .mg-t--auto {
@@ -40,19 +40,19 @@
 
 // RIGHT
 .mg-r--xs {
-	margin-right: var(--space-xs);
+	margin-right: $space--xs;
 }
 
 .mg-r--sm {
-	margin-right: var(--space-sm);
+	margin-right: $space--sm;
 }
 
 .mg-r--md {
-	margin-right: var(--space-md);
+	margin-right: $space--md;
 }
 
 .mg-r--lg {
-	margin-right: var(--space-lg);
+	margin-right: $space--lg;
 }
 
 .mg-r--auto {
@@ -62,19 +62,19 @@
 
 // BOTTOM
 .mg-b--xs {
-	margin-bottom: var(--space-xs);
+	margin-bottom: $space--xs;
 }
 
 .mg-b--sm {
-	margin-bottom: var(--space-sm);
+	margin-bottom: $space--sm;
 }
 
 .mg-b--md {
-	margin-bottom: var(--space-md);
+	margin-bottom: $space--md;
 }
 
 .mg-b--lg {
-	margin-bottom: var(--space-lg);
+	margin-bottom: $space--lg;
 }
 
 .mg-b--auto {
@@ -84,19 +84,19 @@
 
 // LEFT
 .mg-l--xs {
-	margin-left: var(--space-xs);
+	margin-left: $space--xs;
 }
 
 .mg-l--sm {
-	margin-left: var(--space-sm);
+	margin-left: $space--sm;
 }
 
 .mg-l--md {
-	margin-left: var(--space-md);
+	margin-left: $space--md;
 }
 
 .mg-l--lg {
-	margin-left: var(--space-lg);
+	margin-left: $space--lg;
 }
 
 .mg-l--auto {
