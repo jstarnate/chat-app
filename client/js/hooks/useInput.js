@@ -1,18 +1,22 @@
-import { useState } from 'react'
+import { useState } from 'react';
 
-export default function(initialValue) {
-	const [value, modifyEvent] = useState(initialValue)
-	const [error, setError] = useState(null)
+export default function (initialValue) {
+    const [value, modifyEvent] = useState(initialValue);
+    const [error, setError] = useState(null);
 
-	function handle(fn, event) {
-		fn(event.target.value)
-	}
+    function handle(fn, event) {
+        fn(event.target.value);
+    }
 
-	function handleError(obj) {
-		setError(obj ? obj.properties.message : null)
-	}
+    function handleError(obj) {
+        setError(obj ? obj.properties.message : null);
+    }
 
-	const data = { value, error, onChangeEvent: handle.bind(null, modifyEvent) }
+    const data = {
+        value,
+        error,
+        onChangeEvent: handle.bind(null, modifyEvent),
+    };
 
-	return [value, data, handleError]
+    return [value, data, handleError];
 }

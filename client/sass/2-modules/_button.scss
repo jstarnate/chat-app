@@ -4,53 +4,53 @@
 	cursor: pointer;
 
 	&:disabled {
-		background: var(--pale);
-		color: var(--gray-40);
+		background: $pale;
+		color: $gray--light;
 		cursor: default;
 	}
 }
 
-.btn--blue:not(:disabled) {
-	background: var(--light-blue);
-	color: var(--white);
+.btn--primary:not(:disabled) {
+	background: $primary--light;
+	color: $white;
 
 	&:hover {
-		background: lighten(#45A3D7, 5%);
+		background: lighten($primary--light, 5%);
 	}
 }
 
 .btn--secondary:not(:disabled) {
-	background: var(--gray-60);
-	color: var(--black);
+	background: $gray--lighter;
+	color: $black;
 
 	&:hover {
-		background: var(--gray-40);
+		background: $gray--light;
+	}
+}
+
+.btn--danger {
+	background: $danger;
+	color: $white;
+
+	&:hover {
+		background: lighten($danger, 5%);
 	}
 }
 
 .btn--black {
-	background: var(--black);
-	color: var(--white);
+	background: $black;
+	color: $white;
 
 	&:hover {
-		background: lighten(#333333, 5%);
+		background: lighten($black, 5%);
 	}
 }
 
 .btn--white {
 	background: none;
-	color: var(--black);
+	color: $black;
 
 	&:hover {
-		background: darken(#FFFFFF, 5%);
-	}
-}
-
-.btn--danger {
-	background: var(--red);
-	color: var(--white);
-
-	&:hover {
-		background: lighten(#DC3333, 5%);
+		background: darken($white, 5%);
 	}
 }

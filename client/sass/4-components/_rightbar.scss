@@ -13,7 +13,7 @@
 
 	&__avatar-container {
 		@include size(106px);
-		border: 3px solid var(--blue);
+		border: 3px solid $primary;
 	}
 
 	&__upload-button {

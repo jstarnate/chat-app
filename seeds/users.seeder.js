@@ -1,31 +1,107 @@
 const usernames = [
-	{ first_name: 'Luffy', last_name: 'Monkey', username: 'strawhat', gender: 'Male' },
-	{ first_name: 'Franky', last_name: 'Cyborg', username: 'franky', gender: 'Male' },
-	{ first_name: 'Chopper', last_name: 'Moose', username: 'chopper', gender: 'Male' },
-	{ first_name: 'Jinbei', last_name: 'Fishman', username: 'jinbei', gender: 'Male' },
-	{ first_name: 'Akainu', last_name: 'Sakazuki', username: 'akainu', gender: 'Male' },
-	{ first_name: 'Kizaru', last_name: 'Borsalino', username: 'kizaru', gender: 'Male' },
-	{ first_name: 'Kuzan', last_name: 'Aokiji', username: 'aokiji', gender: 'Male' },
-	{ first_name: 'Sengoku', last_name: 'Buddha', username: 'sengoku', gender: 'Male' },
-	{ first_name: 'Smoker', last_name: 'Cigars', username: 'smoker', gender: 'Male' },
-	{ first_name: 'Mihawk', last_name: 'Hawkeye', username: 'mihawk', gender: 'Male' },
-	{ first_name: 'Doflamingo', last_name: 'Donquixote', username: 'doflamingo', gender: 'Male' },
-	{ first_name: 'Crocodile', last_name: 'Sandman', username: 'crocodile', gender: 'Male' },
-	{ first_name: 'Ivankov', last_name: 'Emporio', username: 'ivankov', gender: 'Male' },
-	{ first_name: 'Dragon', last_name: 'Monkey', username: 'dragon', gender: 'Male' },
-	{ first_name: 'Magellan', last_name: 'Warden', username: 'magellan', gender: 'Male' }
-]
+    {
+        first_name: 'Bruce',
+        last_name: 'Wayne',
+        username: 'batman',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Tony',
+        last_name: 'Stark',
+        username: 'ironman',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Diana',
+        last_name: 'Prince',
+        username: 'wonder.woman',
+        gender: 'Female',
+    },
+    {
+        first_name: 'Slade',
+        last_name: 'Wilson',
+        username: 'deathstroke',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Clark',
+        last_name: 'Kent',
+        username: 'superman',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Natasha',
+        last_name: 'Romanoff',
+        username: 'black.widow',
+        gender: 'Female',
+    },
+    {
+        first_name: 'Hal',
+        last_name: 'Jordan',
+        username: 'green.lantern',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Selena',
+        last_name: 'Kyle',
+        username: 'catwoman',
+        gender: 'Female',
+    },
+    {
+        first_name: 'Bucky',
+        last_name: 'Barnes',
+        username: 'winter.soldier',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Frank',
+        last_name: 'Castle',
+        username: 'punisher',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Lex',
+        last_name: 'Luthor',
+        username: 'anti.et',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Barry',
+        last_name: 'Allen',
+        username: 'flashmob',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Steven',
+        last_name: 'Rogers',
+        username: 'cpt.us',
+        gender: 'Male',
+    },
+    {
+        first_name: 'Kara',
+        last_name: 'Zor-el',
+        username: 'supergirl',
+        gender: 'Female',
+    },
+    {
+        first_name: 'Stephen',
+        last_name: 'Strange',
+        username: 'dr.magic',
+        gender: 'Male',
+    },
+];
 
-const factory = (list) => {
-	const seed = list.map(item => ({
-		first_name: item.first_name,
-		last_name: item.last_name,
-		username: item.username,
-		gender: item.gender,
-		password: '$2b$10$ace85dAegGDRB8TVanj7WesuOKBCL/.3MzqM9IX9DH4gHhsGtTJOm'
-	}))
+const factory = list => {
+    const seed = list.map(item => ({
+        first_name: item.first_name,
+        last_name: item.last_name,
+        username: item.username,
+        gender: item.gender,
+        password:
+            '$2b$10$ace85dAegGDRB8TVanj7WesuOKBCL/.3MzqM9IX9DH4gHhsGtTJOm',
+    }));
 
-	return seed
-}
+    return seed;
+};
 
-export default factory(usernames)
+export default factory(usernames);

@@ -8,35 +8,35 @@
 }
 
 .bg--white {
-	background: var(--white);
+	background: $white;
 }
 
 .bg--black {
-	background: var(--black);
+	background: $black;
 }
 
 .bg--pale {
-	background: var(--pale);
+	background: $pale;
 }
 
-.bg--gray-20 {
-	background: var(--gray-20);
+.bg--gray {
+	background: $gray;
 }
 
-.bg--gray-40 {
-	background: var(--gray-40);
+.bg--gray-light {
+	background: $gray--light;
 }
 
-.bg--gray-60 {
-	background: var(--gray-60);
+.bg--gray-lighter {
+	background: $gray--lighter;
 }
 
-.bg--blue {
-	background: var(--blue);
+.bg--primary {
+	background: $primary;
 }
 
 .bg--danger {
-	color: var(--red);
+	color: $danger;
 }
 
 
@@ -47,37 +47,37 @@
 | ==================================================
 */
 .text--white {
-	color: var(--white);
+	color: $white;
 }
 
 .text--black {
-	color: var(--black);
+	color: $black;
 }
 
-.text--gray-20 {
-	color: var(--gray-20);
+.text--gray {
+	color: $gray;
 }
 
-.text--gray-40 {
-	color: var(--gray-40);
+.text--gray-light {
+	color: $gray--light;
 }
 
-.text--gray-60 {
-	color: var(--gray-60);
+.text--gray-lighter {
+	color: $gray--lighter;
 }
 
-.text--blue {
-	color: var(--blue);
+.text--primary {
+	color: $primary;
 }
 
 .text--success {
-	color: var(--green);
+	color: $success;
 }
 
 .text--info {
-	color: var(--light-blue);
+	color: $primary--light;
 }
 
 .text--danger {
-	color: var(--red);
+	color: $danger;
 }

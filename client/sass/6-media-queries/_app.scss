@@ -17,7 +17,7 @@
 @media only screen and (max-width: 768px) {
 	.header {
 		&__signout {
-			margin-left: var(--space-md);
+			margin-left: $space--md;
 		}
 	}
 
