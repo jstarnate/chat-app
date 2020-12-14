@@ -36,14 +36,7 @@ const config = {
             {
                 test: /\.s(a|c)ss$/,
                 exclude: path.resolve(__dirname, 'node_modules'),
-                use: [
-                    {
-                        loader: MiniCssExtractPlugin.loader,
-                        options: { hmr: devMode },
-                    },
-                    'css-loader',
-                    'sass-loader',
-                ],
+                use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
             },
         ],
     },
