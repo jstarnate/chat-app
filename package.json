@@ -3,6 +3,7 @@
 	"version": "1.0.0",
 	"description": "MERN Chat App",
 	"main": "server.js",
+	"type": "module",
 	"scripts": {
 		"dev": "env $(cat .env | grep -v \"#\" | xargs) NODE_ENV=development webpack serve",
 		"prod": "env $(cat .env | grep -v \"#\" | xargs) NODE_ENV=production webpack",
