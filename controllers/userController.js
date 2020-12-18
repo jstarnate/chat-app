@@ -1,6 +1,9 @@
 import { v2 as cloudinary } from 'cloudinary';
+import dotenv from 'dotenv';
 import User from '../models/User';
 import Conversation from '../models/Conversation';
+
+dotenv.config();
 
 class UserController {
     constructor() {

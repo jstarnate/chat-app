@@ -1,7 +1,10 @@
 import passport from 'passport';
 import { sign as jwtSign } from 'jsonwebtoken';
 import { hashSync } from 'bcrypt';
+import dotenv from 'dotenv';
 import User from '../models/User';
+
+dotenv.config();
 
 class AuthController {
     createResponseError(response, username, password) {

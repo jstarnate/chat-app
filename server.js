@@ -8,9 +8,12 @@ import connectMongo from 'connect-mongo';
 import { v4 as uuidv4 } from 'uuid';
 import cors from 'cors';
 import http from 'http';
+import dotenv from 'dotenv';
 import passportConfig from './config/passport';
 import socketsConfig from './config/sockets';
 import routesConfig from './config/routes';
+
+dotenv.config();
 
 const serverPort = process.env.SERVER_PORT || 8000;
 const app = express();

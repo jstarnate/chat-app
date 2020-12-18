@@ -1,6 +1,9 @@
 import seeder from 'mongoose-seed';
+import dotenv from 'dotenv';
 import path from 'path';
 import users from './users.seeder';
+
+dotenv.config();
 
 const seeds = [
     {

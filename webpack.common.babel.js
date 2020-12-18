@@ -4,9 +4,6 @@ import HtmlWebpackPlugin from 'html-webpack-plugin';
 import Dotenv from 'dotenv-webpack';
 import path from 'path';
 
-const serverPort = process.env.SERVER_PORT || 8000;
-const devMode = process.env.NODE_ENV === 'development';
-
 const config = {
     mode: process.env.NODE_ENV,
     devtool: 'eval-source-map',
@@ -50,7 +47,7 @@ const config = {
         },
     },
     plugins: [
-        new EnvironmentPlugin({ SERVER_PORT: serverPort }),
+        new EnvironmentPlugin({ SERVER_PORT: 8000 }),
         new Dotenv(),
         new MiniCssExtractPlugin({
             filename: '[name].css',
@@ -72,41 +69,5 @@ const config = {
         }),
     ],
 };
-
-if (devMode) {
-    config.devServer = {
-        hot: true,
-        port: process.env.CLIENT_PORT || 3000,
-        historyApiFallback: false,
-        contentBase: path.resolve(__dirname, 'dist'),
-        writeToDisk: true,
-        proxy: {
-            '/': { target: `http://localhost:${serverPort}` },
-            '/api': { target: `http://localhost:${serverPort}/api` },
-            '/contacts': {
-                target: `http://localhost:${serverPort}/contacts`,
-                ws: true,
-            },
-            '/messages': {
-                target: `http://localhost:${serverPort}/messages`,
-                ws: true,
-            },
-        },
-    };
-}
-
-if (!devMode) {
-    config.optimization = {
-        splitChunks: {
-            cacheGroups: {
-                vendor: {
-                    test: /[\\/]node_modules[\\/]((axios|react|prop-types|redux|socket.io-client).*)[\\/]/,
-                    name: 'vendor',
-                    chunks: 'all',
-                },
-            },
-        },
-    };
-}
 
 export default config;
