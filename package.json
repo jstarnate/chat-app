@@ -4,11 +4,17 @@
 	"description": "MERN Chat App",
 	"main": "server.js",
 	"type": "module",
+	"engines": {
+		"node": "12.20.0",
+		"npm": "6.14.8"
+	},
 	"scripts": {
 		"dev": "env $(cat .env | grep -v \"#\" | xargs) NODE_ENV=development webpack serve",
 		"prod": "env $(cat .env | grep -v \"#\" | xargs) NODE_ENV=production webpack",
 		"serve": "env $(cat .env | grep -v \"#\" | xargs) nodemon --exec babel-node server.js",
-		"seed": "env $(cat .env | grep -v \"#\" | xargs) babel-node ./seeds/seeder"
+		"seed": "env $(cat .env | grep -v \"#\" | xargs) babel-node ./seeds/seeder",
+		"start": "env $(cat .env | grep -v \"#\" | xargs) babel-node server.js",
+		"heroku-postbuild": "yarn"
 	},
 	"keywords": [
 		"chat",
@@ -46,6 +52,7 @@
 		"uuid": "^8.3"
 	},
 	"devDependencies": {
+		"@babel/cli": "^7.12.10",
 		"@babel/core": "^7.12.10",
 		"@babel/node": "^7.12.10",
 		"@babel/plugin-syntax-dynamic-import": "^7.8.3",
